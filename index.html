@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EA Pro Journal Cloud - Apex Elite v9.1</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
+    
+    <script type="module">
+        // Import Firebase SDKs
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
+        import { getFirestore, collection, doc, setDoc, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js";
+
+        // Global environment variables (Provided by system)
+        const firebaseConfig = JSON.parse(__firebase_config);
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'ea-pro-journal-v9';
+
+        // State Management
+        let tradeHistory = [];
+        let viewDate = new Date();
+        let currentUser = null;
+
+        // UI Selectors
+        const toast = document.getElementById('toast');
+        const toastMsg = document.getElementById('toastMsg');
+
+        // Rule 3: Auth Before Queries
+        const initAuth = async () => {
+            try {
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                    await signInWithCustomToken(auth, __initial_auth_token);
+                } else {
+                    await signInAnonymously(auth);
+                }
+            } catch (error) {
+                console.error("Auth error:", error);
+                showToast("Login Failed", "bg-rose-600");
+            }
+        };
+
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                currentUser = user;
+                document.getElementById('userIdDisplay').innerText = `UserID: ${user.uid}`;
+                syncData();
+            } else {
+                initAuth();
+            }
+        });
+
+        // Rule 1 & 2: Simple Snapshot Listener
+        function syncData() {
+            if (!currentUser) return;
+            // Strict Path: /artifacts/{appId}/users/{userId}/{collectionName}
+            const collectionPath = collection(db, 'artifacts', appId, 'users', currentUser.uid, 'trades');
+            
+            onSnapshot(collectionPath, (snapshot) => {
+                tradeHistory = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                updateDashboard();
+            }, (error) => {
+                console.error("Firestore sync error:", error);
+                showToast("Sync Error", "bg-rose-600");
+            });
+        }
+
+        // Window exposed functions for UI interaction
+        window.saveRecord = async (e) => {
+            e.preventDefault();
+            if (!currentUser) return;
+
+            const editId = document.getElementById('editId').value;
+            const dateVal = document.getElementById('tradeDate').value;
+            const docId = editId || dateVal;
+
+            const record = {
+                rawDate: dateVal,
+                date: new Date(dateVal).toLocaleDateString('th-TH'),
+                capital: parseFloat(document.getElementById('capital').value),
+                profit: parseFloat(document.getElementById('profit').value),
+                wins: parseInt(document.getElementById('wins').value),
+                losses: parseInt(document.getElementById('losses').value),
+                pf: parseFloat(document.getElementById('pf').value) || 0,
+                dd: parseFloat(document.getElementById('dd').value) || 0,
+                updatedAt: new Date().toISOString()
+            };
+
+            try {
+                const docRef = doc(db, 'artifacts', appId, 'users', currentUser.uid, 'trades', docId);
+                await setDoc(docRef, record);
+                showToast('SYNCED TO CLOUD');
+                resetForm();
+            } catch (err) {
+                console.error("Save error:", err);
+                showToast('SAVE FAILED', 'bg-rose-600');
+            }
+        };
+
+        window.deleteRecord = async (id) => {
+            if (!currentUser || !confirm('Purge this record from cloud?')) return;
+            try {
+                const docRef = doc(db, 'artifacts', appId, 'users', currentUser.uid, 'trades', id);
+                await deleteDoc(docRef);
+                showToast('RECORD PURGED');
+                resetForm();
+            } catch (err) {
+                showToast('DELETE FAILED');
+            }
+        };
+
+        window.changeMonth = (offset) => {
+            viewDate.setMonth(viewDate.getMonth() + offset);
+            renderCalendar();
+        };
+
+        function updateDashboard() {
+            let totalP = 0, totalW = 0, totalL = 0, maxDDVal = 0, avgPf = 0;
+
+            tradeHistory.forEach(record => {
+                totalP += record.profit; totalW += record.wins; totalL += record.losses;
+                if (record.dd > maxDDVal) maxDDVal = record.dd;
+                avgPf += record.pf;
+            });
+
+            document.getElementById('totalProfit').textContent = `$${totalP.toFixed(2)}`;
+            document.getElementById('winRate').textContent = `${(totalW + totalL) > 0 ? (totalW / (totalW + totalL) * 100).toFixed(1) : 0}%`;
+            document.getElementById('maxDD').textContent = `${maxDDVal.toFixed(2)}%`;
+            document.getElementById('expectancy').textContent = tradeHistory.length > 0 ? (avgPf / tradeHistory.length).toFixed(2) : "0.00";
+
+            renderCalendar();
+        }
+
+        function renderCalendar() {
+            const calendarBody = document.getElementById('calendarBody');
+            const calendarMonthLabel = document.getElementById('calendarMonth');
+            calendarBody.innerHTML = '';
+
+            const year = viewDate.getFullYear();
+            const month = viewDate.getMonth();
+            calendarMonthLabel.innerText = new Intl.DateTimeFormat('th-TH', { month: 'long', year: 'numeric' }).format(viewDate);
+
+            const firstDay = new Date(year, month, 1).getDay();
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+            // Offset empty days
+            for (let i = 0; i < firstDay; i++) {
+                const empty = document.createElement('div');
+                empty.className = "min-h-[70px] md:min-h-[110px] opacity-0";
+                calendarBody.appendChild(empty);
+            }
+
+            let winDays = 0;
+            for (let day = 1; day <= daysInMonth; day++) {
+                const currentStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                const dailyTrades = tradeHistory.filter(t => t.rawDate === currentStr);
+                
+                const dayDiv = document.createElement('div');
+                dayDiv.className = "min-h-[70px] md:min-h-[110px] p-2 rounded-xl border border-white/5 bg-white/5 flex flex-col justify-between transition-all hover:bg-white/10";
+                
+                let dayContent = `<span class="text-[9px] font-black opacity-20">${day}</span>`;
+
+                if (dailyTrades.length > 0) {
+                    const totalProfit = dailyTrades.reduce((a, b) => a + b.profit, 0);
+                    const isWin = totalProfit >= 0;
+                    if (isWin) winDays++;
+
+                    dayDiv.className += isWin ? " border-emerald-500/40 bg-emerald-500/10" : " border-rose-500/40 bg-rose-500/10";
+                    dayContent = `
+                        <div class="flex justify-between items-start">
+                            <span class="text-[10px] font-black ${isWin ? 'text-emerald-400' : 'text-rose-400'}">${day}</span>
+                        </div>
+                        <div class="text-center flex-1 flex flex-col justify-center">
+                            <p class="text-xs md:text-base font-black ${isWin ? 'text-emerald-400' : 'text-rose-400'} font-mono leading-none">
+                                ${isWin ? '+' : ''}${Math.round(totalProfit)}
+                            </p>
+                        </div>
+                    `;
+                    dayDiv.onclick = () => editRecord(dailyTrades[0]);
+                    dayDiv.style.cursor = "pointer";
+                }
+
+                dayDiv.innerHTML = dayContent;
+                calendarBody.appendChild(dayDiv);
+            }
+            document.getElementById('winCount').innerText = `${winDays} Win Days`;
+        }
+
+        function editRecord(record) {
+            document.getElementById('editId').value = record.id;
+            document.getElementById('tradeDate').value = record.rawDate;
+            document.getElementById('capital').value = record.capital;
+            document.getElementById('profit').value = record.profit;
+            document.getElementById('wins').value = record.wins;
+            document.getElementById('losses').value = record.losses;
+            document.getElementById('pf').value = record.pf;
+            document.getElementById('dd').value = record.dd;
+            document.getElementById('submitBtn').innerText = "Update Cloud";
+            document.getElementById('cancelBtn').classList.remove('hidden');
+            document.getElementById('deleteBtn').classList.remove('hidden');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        window.resetForm = () => {
+            document.getElementById('tradeForm').reset();
+            document.getElementById('editId').value = "";
+            document.getElementById('tradeDate').valueAsDate = new Date();
+            document.getElementById('submitBtn').innerText = "Save to Cloud";
+            document.getElementById('cancelBtn').classList.add('hidden');
+            document.getElementById('deleteBtn').classList.add('hidden');
+        };
+
+        window.triggerDelete = () => {
+            const id = document.getElementById('editId').value;
+            if (id) deleteRecord(id);
+        };
+
+        function showToast(msg, color = 'bg-blue-600') {
+            toastMsg.innerText = msg;
+            toast.className = `fixed bottom-10 left-1/2 -translate-x-1/2 ${color} px-8 py-4 rounded-full shadow-2xl transition-all z-50 flex items-center gap-3`;
+            toast.style.transform = "translate(-50%, 0)";
+            toast.style.opacity = "1";
+            setTimeout(() => {
+                toast.style.transform = "translate(-50%, 100px)";
+                toast.style.opacity = "0";
+            }, 3000);
+        }
+
+        // Initialize display
+        document.getElementById('tradeDate').valueAsDate = new Date();
+    </script>
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;600;800&family=JetBrains+Mono:wght@400;700&display=swap');
+        body { font-family: 'Kanit', sans-serif; background-color: #020617; color: #f1f5f9; }
+        .glass { background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.05); }
+        input { background: rgba(30, 41, 59, 0.6) !important; border: 1px solid rgba(255, 255, 255, 0.1) !important; color: white !important; }
+        .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; }
+    </style>
+</head>
+<body class="min-h-screen p-4 md:p-8">
+
+    <!-- Header -->
+    <header class="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
+        <div class="flex items-center gap-3">
+            <div class="p-2 bg-blue-600 rounded-xl shadow-lg">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><path d="M12 2v10"/><path d="m16 8-4 4-4-4"/><path d="M12 14v8"/><path d="m8 18 4 4 4-4"/></svg>
+            </div>
+            <div>
+                <h1 class="text-2xl font-black italic uppercase tracking-tighter">Apex <span class="text-blue-500">Cloud</span></h1>
+                <p id="userIdDisplay" class="text-[8px] text-slate-500 font-mono tracking-tighter">Connecting...</p>
+            </div>
+        </div>
+        <div class="flex gap-2">
+            <button onclick="window.location.reload()" class="px-4 py-2 bg-white/5 rounded-lg text-[10px] font-bold uppercase tracking-widest hover:bg-white/10">Refresh</button>
+            <button onclick="document.getElementById('tradeForm').scrollIntoView({behavior:'smooth'})" class="md:hidden px-4 py-2 bg-blue-600 rounded-lg text-[10px] font-bold uppercase shadow-lg">Add Record</button>
+        </div>
+    </header>
+
+    <!-- KPI Cards -->
+    <section class="max-w-6xl mx-auto grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+        <div class="glass p-5 rounded-3xl border-t border-blue-500/20">
+            <p class="text-[8px] uppercase text-blue-400 font-black tracking-widest">Total Profit</p>
+            <h3 id="totalProfit" class="text-xl font-bold font-mono">$0.00</h3>
+        </div>
+        <div class="glass p-5 rounded-3xl border-t border-emerald-500/20">
+            <p class="text-[8px] uppercase text-emerald-400 font-black tracking-widest">Win Rate</p>
+            <h3 id="winRate" class="text-xl font-bold font-mono">0%</h3>
+        </div>
+        <div class="glass p-5 rounded-3xl border-t border-amber-500/20">
+            <p class="text-[8px] uppercase text-amber-400 font-black tracking-widest">Avg PF</p>
+            <h3 id="expectancy" class="text-xl font-bold font-mono">0.00</h3>
+        </div>
+        <div class="glass p-5 rounded-3xl border-t border-rose-500/20">
+            <p class="text-[8px] uppercase text-rose-400 font-black tracking-widest">Max DD</p>
+            <h3 id="maxDD" class="text-xl font-bold font-mono">0%</h3>
+        </div>
+    </section>
+
+    <!-- Main Workspace -->
+    <div class="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8 pb-20">
+        
+        <!-- Entry Form -->
+        <section class="lg:col-span-4 glass p-8 rounded-[2.5rem] h-fit">
+            <div class="mb-6">
+                <h2 class="text-lg font-bold text-white uppercase italic tracking-widest">Day Terminal</h2>
+                <p class="text-[9px] text-slate-500">Syncs to all devices via cloud</p>
+            </div>
+            
+            <form id="tradeForm" onsubmit="saveRecord(event)" class="space-y-4">
+                <input type="hidden" id="editId">
+                <div class="space-y-1">
+                    <label class="text-[9px] font-black text-slate-500 uppercase px-1">Date</label>
+                    <input type="date" id="tradeDate" required class="w-full p-3 rounded-xl text-xs font-bold focus:ring-2 focus:ring-blue-500 outline-none">
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div class="space-y-1">
+                        <label class="text-[9px] font-black text-slate-500 uppercase px-1">Capital ($)</label>
+                        <input type="number" id="capital" step="0.01" required class="w-full p-3 rounded-xl text-xs font-bold">
+                    </div>
+                    <div class="space-y-1">
+                        <label class="text-[9px] font-black text-slate-500 uppercase px-1">Net Profit ($)</label>
+                        <input type="number" id="profit" step="0.01" required class="w-full p-3 rounded-xl text-xs font-bold">
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div class="space-y-1">
+                        <label class="text-[9px] font-black text-slate-500 uppercase px-1">Wins</label>
+                        <input type="number" id="wins" required class="w-full p-3 rounded-xl text-xs font-bold">
+                    </div>
+                    <div class="space-y-1">
+                        <label class="text-[9px] font-black text-slate-500 uppercase px-1">Losses</label>
+                        <input type="number" id="losses" required class="w-full p-3 rounded-xl text-xs font-bold">
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div class="space-y-1">
+                        <label class="text-[9px] font-black text-blue-500 uppercase px-1">PF</label>
+                        <input type="number" id="pf" step="0.01" class="w-full p-3 rounded-xl text-xs font-bold border-blue-500/20">
+                    </div>
+                    <div class="space-y-1">
+                        <label class="text-[9px] font-black text-rose-500 uppercase px-1">DD (%)</label>
+                        <input type="number" id="dd" step="0.01" class="w-full p-3 rounded-xl text-xs font-bold border-rose-500/20">
+                    </div>
+                </div>
+                <div class="pt-4 flex flex-col gap-2">
+                    <button type="submit" id="submitBtn" class="w-full bg-blue-600 text-white font-black py-4 rounded-xl shadow-lg uppercase text-[10px] tracking-widest hover:bg-blue-500 transition-all">Save to Cloud</button>
+                    <div class="flex gap-2">
+                        <button type="button" id="cancelBtn" class="hidden flex-1 bg-white/5 text-slate-500 py-3 rounded-xl text-[9px] uppercase font-bold hover:bg-white/10" onclick="resetForm()">Discard</button>
+                        <button type="button" id="deleteBtn" class="hidden flex-1 bg-rose-500/10 text-rose-500 py-3 rounded-xl text-[9px] uppercase font-bold hover:bg-rose-500/20" onclick="triggerDelete()">Delete</button>
+                    </div>
+                </div>
+            </form>
+        </section>
+
+        <!-- Calendar Display -->
+        <section class="lg:col-span-8">
+            <div class="glass p-6 md:p-10 rounded-[2.5rem] shadow-2xl">
+                <div class="flex justify-between items-center mb-8">
+                    <div>
+                        <h2 id="calendarMonth" class="text-2xl md:text-3xl font-black text-white uppercase italic leading-none">Month Year</h2>
+                        <p id="winCount" class="text-[10px] text-emerald-400 font-bold uppercase mt-2 tracking-widest">0 Win Days</p>
+                    </div>
+                    <div class="flex gap-2">
+                        <button onclick="changeMonth(-1)" class="p-3 bg-white/5 rounded-xl text-white hover:bg-white/10 transition-all">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="m15 18-6-6 6-6"/></svg>
+                        </button>
+                        <button onclick="changeMonth(1)" class="p-3 bg-white/5 rounded-xl text-white hover:bg-white/10 transition-all">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="m9 18 6-6-6-6"/></svg>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="calendar-grid mb-2">
+                    <div class="text-[9px] font-black text-slate-700 text-center uppercase tracking-tighter">Sun</div>
+                    <div class="text-[9px] font-black text-slate-700 text-center uppercase tracking-tighter">Mon</div>
+                    <div class="text-[9px] font-black text-slate-700 text-center uppercase tracking-tighter">Tue</div>
+                    <div class="text-[9px] font-black text-slate-700 text-center uppercase tracking-tighter">Wed</div>
+                    <div class="text-[9px] font-black text-slate-700 text-center uppercase tracking-tighter">Thu</div>
+                    <div class="text-[9px] font-black text-slate-700 text-center uppercase tracking-tighter">Fri</div>
+                    <div class="text-[9px] font-black text-slate-700 text-center uppercase tracking-tighter">Sat</div>
+                </div>
+                <div id="calendarBody" class="calendar-grid">
+                    <!-- Dynamic Days -->
+                </div>
+            </div>
+
+            <!-- Mobile Footer Stats -->
+            <div class="mt-8 flex justify-center gap-12 opacity-40">
+                <div class="text-center">
+                    <p class="text-[9px] font-bold uppercase tracking-widest">Continuity</p>
+                    <p id="consistencyScore" class="text-sm font-black font-mono">0%</p>
+                </div>
+                <div class="text-center">
+                    <p class="text-[9px] font-bold uppercase tracking-widest">Cloud Logs</p>
+                    <p id="totalLogs" class="text-sm font-black font-mono">0</p>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- Floating Sync Toast -->
+    <div id="toast" style="opacity: 0; transform: translate(-50%, 100px);" class="fixed bottom-10 left-1/2 -translate-x-1/2 bg-blue-600 px-8 py-4 rounded-full shadow-2xl transition-all z-50 flex items-center gap-3">
+        <div class="w-2 h-2 bg-white rounded-full animate-pulse"></div>
+        <span id="toastMsg" class="text-[10px] font-black text-white tracking-widest uppercase">Syncing</span>
+    </div>
+
+</body>
+</html>
