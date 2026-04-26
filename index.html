@@ -2,124 +2,324 @@
 <html lang="th">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EA Pro Journal - Sheets v12.1</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Apex Elite - Premium Sync v13.1</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;600;800&family=JetBrains+Mono:wght@500&display=swap');
-        body { font-family: 'Kanit', sans-serif; background-color: #020617; color: #f1f5f9; }
-        .glass { background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.05); }
-        input { background: rgba(30, 41, 59, 0.7) !important; border: 1px solid rgba(255, 255, 255, 0.1) !important; color: white !important; outline: none; border-radius: 1rem !important; padding: 0.75rem !important; width: 100%; font-size: 0.9rem; }
-        input:focus { border-color: #10b981 !important; }
-        .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; }
-        @media (max-width: 640px) { .cal-grid { gap: 4px; } }
-        .font-mono { font-family: 'JetBrains Mono', monospace; }
-        .loader { border-top-color: #10b981; animation: spinner 1.5s linear infinite; }
-        @keyframes spinner { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        @import url('https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;600;800&family=JetBrains+Mono:wght@700&display=swap');
+        
+        :root {
+            --primary: #10b981;
+            --danger: #f43f5e;
+            --bg: #020617;
+        }
+
+        body { 
+            font-family: 'Kanit', sans-serif; 
+            background: var(--bg);
+            background-image: 
+                radial-gradient(at 0% 0%, rgba(16, 185, 129, 0.08) 0px, transparent 40%),
+                radial-gradient(at 100% 100%, rgba(59, 130, 246, 0.08) 0px, transparent 40%);
+            color: #f1f5f9; 
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+
+        .glass { 
+            background: rgba(15, 23, 42, 0.5); 
+            backdrop-filter: blur(16px); 
+            border: 1px solid rgba(255, 255, 255, 0.06); 
+            box-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.5);
+        }
+
+        .bottom-sheet { 
+            transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1); 
+            transform: translateY(100%); 
+        }
+        .bottom-sheet.active { 
+            transform: translateY(0); 
+        }
+
+        input { 
+            background: rgba(10, 15, 25, 0.8) !important; 
+            border: 1px solid rgba(255, 255, 255, 0.1) !important; 
+            color: white !important; 
+            outline: none; 
+            border-radius: 1rem !important; 
+            padding: 1rem !important; 
+            width: 100%; 
+            text-align: center; 
+            font-family: 'JetBrains Mono', monospace;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        input:focus { border-color: var(--primary) !important; box-shadow: 0 0 20px rgba(16, 185, 129, 0.15); transform: translateY(-1px); }
+
+        .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 10px; }
+        @media (max-width: 640px) { .cal-grid { gap: 6px; } }
+
+        .day-card {
+            aspect-ratio: 1/1.3;
+            transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+            position: relative;
+            overflow: hidden;
+            border-radius: 1.25rem;
+        }
+        .day-card:hover { transform: translateY(-4px); border-color: rgba(255,255,255,0.2); }
+        .day-card:active { transform: scale(0.92); }
+
+        /* Progress Bar Styles */
+        .p-bar-container {
+            position: absolute;
+            bottom: 8px;
+            left: 8px;
+            right: 8px;
+            height: 5px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        .p-bar-fill {
+            height: 100%;
+            transition: width 1s ease-out;
+            border-radius: 10px;
+        }
+
+        .stepper-btn { 
+            background: rgba(255, 255, 255, 0.04); 
+            border: 1px solid rgba(255,255,255,0.05);
+            width: 54px; height: 54px; 
+            display: flex; items-center; justify-center; 
+            border-radius: 18px; 
+            transition: all 0.2s;
+        }
+        .stepper-btn:active { background: rgba(255, 255, 255, 0.12); transform: scale(0.9); }
+
+        .heat-glow-win { box-shadow: inset 0 0 15px rgba(16, 185, 129, 0.1); }
+        .heat-glow-loss { box-shadow: inset 0 0 15px rgba(244, 63, 94, 0.05); }
+
+        .btn-gradient {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            box-shadow: 0 10px 25px -5px rgba(16, 185, 129, 0.4);
+        }
     </style>
 </head>
-<body class="min-h-screen p-4 md:p-10 max-w-6xl mx-auto pb-24">
+<body class="safe-area-inset-bottom">
 
-    <header class="flex justify-between items-center mb-8">
-        <div class="flex items-center gap-4">
-            <div class="p-3 bg-emerald-600 rounded-2xl shadow-xl shadow-emerald-900/20">
-                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"><path d="M12 2v10"/><path d="m16 8-4 4-4-4"/><path d="M12 14v8"/><path d="m8 18 4 4 4-4"/></svg>
-            </div>
-            <div>
-                <h1 class="text-2xl font-black italic uppercase tracking-tighter leading-none">Apex <span class="text-emerald-500">Sheets</span></h1>
-                <p id="syncStatus" class="text-[10px] text-slate-500 font-bold uppercase mt-1 tracking-widest">☁️ Google Cloud Connected</p>
-            </div>
-        </div>
-        <button onclick="fetchData()" class="p-3 glass rounded-xl hover:bg-white/10 transition-all">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"></path><path d="M21 3v5h-5"></path></svg>
-        </button>
-    </header>
-
-    <section class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-10 text-center">
-        <div class="glass p-6 rounded-3xl border-t-2 border-emerald-500/30 shadow-lg"><p class="text-[9px] uppercase text-emerald-400 font-black">Net Profit</p><h3 id="totalP" class="text-2xl font-bold font-mono text-white">$0.00</h3></div>
-        <div class="glass p-6 rounded-3xl border-t-2 border-emerald-500/30 shadow-lg"><p class="text-[9px] uppercase text-emerald-400 font-black">Win Rate</p><h3 id="winR" class="text-2xl font-bold font-mono text-white">0%</h3></div>
-        <div class="glass p-6 rounded-3xl border-t-2 border-emerald-500/30 shadow-lg"><p class="text-[9px] uppercase text-emerald-400 font-black">Avg PF</p><h3 id="avgP" class="text-2xl font-bold font-mono text-white">0.00</h3></div>
-        <div class="glass p-6 rounded-3xl border-t-2 border-rose-500/30 shadow-lg"><p class="text-[9px] uppercase text-rose-400 font-black">Max DD</p><h3 id="maxD" class="text-2xl font-bold font-mono text-white">0%</h3></div>
-    </section>
-
-    <div class="grid grid-cols-1 lg:grid-cols-12 gap-10">
-        <section class="lg:col-span-4 glass p-8 rounded-[3rem] h-fit lg:sticky lg:top-10">
-            <h2 class="text-xl font-bold text-white mb-6 italic uppercase tracking-widest">Entry Terminal</h2>
-            <form id="tradeForm" onsubmit="saveToSheet(event)" class="space-y-4">
-                <div class="space-y-1"><label class="text-[10px] text-slate-500 uppercase font-black px-2 tracking-widest">วันที่เทส</label><input type="date" id="tradeDate" required></div>
-                <div class="grid grid-cols-2 gap-4">
-                    <div class="space-y-1"><label class="text-[10px] text-slate-500 uppercase font-black px-2">ทุน ($)</label><input type="number" id="capital" step="0.01" required value="30"></div>
-                    <div class="space-y-1"><label class="text-[10px] text-slate-500 uppercase font-black px-2">กำไร ($)</label><input type="number" id="profit" step="0.01" required></div>
-                </div>
-                <div class="grid grid-cols-2 gap-4">
-                    <div class="space-y-1"><label class="text-[10px] text-slate-500 uppercase font-black px-2">Wins</label><input type="number" id="wins" required></div>
-                    <div class="space-y-1"><label class="text-[10px] text-slate-500 uppercase font-black px-2">Losses</label><input type="number" id="losses" required></div>
-                </div>
-                <div class="grid grid-cols-2 gap-4">
-                    <div class="space-y-1"><label class="text-[10px] text-emerald-500 uppercase font-black px-2">PF</label><input type="number" id="pf" step="0.01" class="border-emerald-500/20"></div>
-                    <div class="space-y-1"><label class="text-[10px] text-rose-500 uppercase font-black px-2">DD (%)</label><input type="number" id="dd" step="0.01" class="border-rose-500/20"></div>
-                </div>
-                <button type="submit" id="submitBtn" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-black py-5 rounded-2xl shadow-xl uppercase text-sm tracking-widest active:scale-95 transition-all mt-4 shadow-emerald-900/20">SAVE TO CLOUD</button>
-            </form>
-        </section>
-
-        <section class="lg:col-span-8">
-            <div class="glass p-6 md:p-10 rounded-[3.5rem] shadow-2xl">
-                <div class="flex justify-between items-center mb-8">
-                    <h2 id="calMonth" class="text-3xl md:text-4xl font-black text-white uppercase italic leading-none">Month</h2>
-                    <div class="flex gap-3">
-                        <button onclick="changeMonth(-1)" class="p-3 glass rounded-xl hover:bg-white/10 transition-all"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="m15 18-6-6 6-6"/></svg></button>
-                        <button onclick="changeMonth(1)" class="p-3 glass rounded-xl hover:bg-white/10 transition-all"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="m9 18 6-6-6-6"/></svg></button>
+    <!-- 🏆 Main Container -->
+    <div class="p-4 md:p-10 max-w-6xl mx-auto">
+        
+        <!-- Premium Header -->
+        <header class="flex justify-between items-center mb-10 pt-4 px-2">
+            <div class="flex items-center gap-5">
+                <div class="relative group">
+                    <div class="absolute inset-0 bg-emerald-500 blur-2xl opacity-20 group-hover:opacity-40 transition-opacity"></div>
+                    <div class="relative p-3.5 bg-gradient-to-br from-emerald-400 to-emerald-600 rounded-2xl shadow-2xl transform group-hover:rotate-6 transition-transform">
+                        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
                     </div>
                 </div>
-                <div class="cal-grid mb-4 text-[10px] font-black text-slate-700 text-center uppercase tracking-widest">
-                    <div>Sun</div><div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div>
+                <div>
+                    <h1 class="text-3xl font-black italic tracking-tighter leading-none tracking-[0.05em] text-white">APEX <span class="text-emerald-500">ELITE</span></h1>
+                    <div class="flex items-center gap-2 mt-1.5 bg-white/5 py-1 px-2.5 rounded-full w-fit">
+                        <div class="w-2 h-2 bg-emerald-500 rounded-full animate-pulse shadow-[0_0_8px_#10b981]"></div>
+                        <p id="syncStatus" class="text-[9px] text-slate-400 font-bold uppercase tracking-[0.2em]">Quantum Live Sync</p>
+                    </div>
                 </div>
-                <div id="calBody" class="cal-grid"></div>
             </div>
-            <div class="mt-8 flex justify-center opacity-20 text-center">
-                <p class="text-[9px] font-bold uppercase tracking-[0.3em]">EA Master Journal v12.1 - Google Sheets Cloud</p>
+            <button onclick="fetchData()" class="p-4 glass rounded-2xl active:rotate-180 transition-all duration-700 hover:bg-white/10">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/></svg>
+            </button>
+        </header>
+
+        <!-- KPI Dashboard -->
+        <section class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-10">
+            <div class="glass p-7 rounded-[2.5rem] relative overflow-hidden group border-t-2 border-emerald-500/20">
+                <p class="text-[10px] uppercase text-emerald-500 font-black tracking-[0.2em] mb-1">Total Profit</p>
+                <h3 id="totalP" class="text-2xl font-black font-mono text-white">$0.00</h3>
+            </div>
+            <div class="glass p-7 rounded-[2.5rem] border-t-2 border-blue-500/20">
+                <p class="text-[10px] uppercase text-blue-400 font-black tracking-[0.2em] mb-1">Win Rate</p>
+                <h3 id="winR" class="text-2xl font-black font-mono text-white">0%</h3>
+            </div>
+            <div class="glass p-7 rounded-[2.5rem] border-t-2 border-amber-500/20">
+                <p class="text-[10px] uppercase text-amber-400 font-black tracking-[0.2em] mb-1">Avg PF</p>
+                <h3 id="avgP" class="text-2xl font-black font-mono text-white">0.00</h3>
+            </div>
+            <div class="glass p-7 rounded-[2.5rem] border-t-2 border-rose-500/20">
+                <p class="text-[10px] uppercase text-rose-500 font-black tracking-[0.2em] mb-1">Max DD</p>
+                <h3 id="maxD" class="text-2xl font-black font-mono text-white">0%</h3>
             </div>
         </section>
+
+        <!-- 📅 Enhanced Calendar -->
+        <div class="glass p-6 md:p-10 rounded-[4rem] mb-10 border border-white/5 shadow-inner">
+            <div class="flex justify-between items-center mb-10 px-4">
+                <div class="flex flex-col">
+                    <span class="text-[10px] text-emerald-500 font-black tracking-[0.4em] uppercase mb-1">Calendar Overview</span>
+                    <h2 id="calMonth" class="text-3xl font-black text-white uppercase italic tracking-tighter">Month</h2>
+                </div>
+                <div class="flex gap-3 bg-black/20 p-2 rounded-2xl border border-white/5">
+                    <button onclick="changeMonth(-1)" class="p-3 hover:bg-white/5 rounded-xl transition-all"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m15 18-6-6 6-6"/></svg></button>
+                    <button onclick="changeMonth(1)" class="p-3 hover:bg-white/5 rounded-xl transition-all"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m9 18 6-6-6-6"/></svg></button>
+                </div>
+            </div>
+            <div class="cal-grid mb-6 text-[10px] font-black text-slate-600 text-center uppercase tracking-[0.3em]">
+                <div>Sun</div><div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div>
+            </div>
+            <div id="calBody" class="cal-grid"></div>
+        </div>
+
+        <!-- Master Records -->
+        <div class="glass p-10 rounded-[4rem] mb-24 border-t border-white/5">
+            <div class="flex justify-between items-end mb-8 px-2">
+                <h2 class="text-sm font-black text-white uppercase tracking-[0.4em]">Master Logs</h2>
+                <span class="text-[10px] text-slate-500 font-bold uppercase tracking-widest" id="logCount">0 Secured Records</span>
+            </div>
+            <div id="historyList" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+        </div>
     </div>
 
-    <div id="loader" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] flex items-center justify-center">
-        <div class="loader ease-linear rounded-full border-4 border-t-4 border-slate-700 h-12 w-12"></div>
+    <!-- ➕ Premium FAB -->
+    <div class="fixed bottom-12 right-10 z-40">
+        <div class="absolute inset-0 bg-emerald-500 blur-3xl opacity-30 scale-150 animate-pulse"></div>
+        <button onclick="toggleModal(true)" class="relative w-22 h-22 p-6 bg-gradient-to-tr from-emerald-600 to-emerald-400 text-white rounded-[2.5rem] shadow-2xl flex items-center justify-center active:scale-90 active:rotate-90 transition-all duration-500 border border-white/20">
+            <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+        </button>
     </div>
 
-    <div id="toast" style="opacity: 0; transition: 0.4s; transform: translate(-50%, 50px);" class="fixed bottom-10 left-1/2 glass px-8 py-4 rounded-full z-50 bg-emerald-600 shadow-2xl">
-        <span id="toastMsg" class="text-[11px] font-black uppercase text-white tracking-widest">Success</span>
+    <!--  UFO Bottom Sheet Modal -->
+    <div id="modalOverlay" class="fixed inset-0 bg-black/85 backdrop-blur-xl z-[50] hidden opacity-0 transition-all duration-500" onclick="toggleModal(false)"></div>
+    <div id="entryModal" class="bottom-sheet fixed bottom-0 left-0 right-0 glass rounded-t-[4.5rem] z-[60] p-10 pb-16 shadow-2xl max-w-2xl mx-auto border-t border-emerald-500/20">
+        <div class="w-20 h-1.5 bg-white/10 rounded-full mx-auto mb-10 shadow-inner"></div>
+        
+        <form id="tradeForm" onsubmit="saveToSheet(event)" class="space-y-10">
+            <div class="flex justify-center items-center gap-4 bg-emerald-500/5 p-2 rounded-2xl w-fit mx-auto border border-emerald-500/10">
+                <input type="date" id="tradeDate" required class="!w-fit !p-2.5 !text-[11px] !bg-transparent !border-none !text-emerald-400 !font-black !uppercase tracking-widest">
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-10">
+                <div class="space-y-4">
+                    <label class="text-[11px] text-emerald-400 font-black uppercase tracking-[0.3em] text-center block">Today Profit ($)</label>
+                    <div class="flex items-center gap-4">
+                        <button type="button" onmousedown="startStep('profit', -10)" onmouseup="stopStep()" onmouseleave="stopStep()" class="stepper-btn text-rose-500">
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="m11 17-5-5 5-5M18 17l-5-5 5-5"/></svg>
+                        </button>
+                        <input type="number" id="profit" step="0.01" required placeholder="0.00" class="text-3xl font-black !border-emerald-500/20 shadow-2xl">
+                        <button type="button" onmousedown="startStep('profit', 10)" onmouseup="stopStep()" onmouseleave="stopStep()" class="stepper-btn text-emerald-500">
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="m13 17 5-5-5-5M6 17l5-5-5-5"/></svg>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="space-y-4">
+                    <label class="text-[11px] text-blue-400 font-black uppercase tracking-[0.3em] text-center block">Deposit ($)</label>
+                    <div class="flex items-center gap-4">
+                        <button type="button" onclick="step('capital', -5)" class="stepper-btn text-slate-500">-</button>
+                        <input type="number" id="capital" step="0.01" required value="30" class="text-3xl font-black !border-blue-500/20">
+                        <button type="button" onclick="step('capital', 5)" class="stepper-btn text-blue-500">+</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-8">
+                <div class="space-y-4">
+                    <label class="text-[10px] text-slate-500 font-black uppercase text-center block tracking-widest">Wins</label>
+                    <div class="flex items-center gap-3">
+                        <button type="button" onclick="step('wins', -1)" class="stepper-btn">-</button>
+                        <input type="number" id="wins" required value="0" class="text-2xl font-black">
+                        <button type="button" onclick="step('wins', 1)" class="stepper-btn text-emerald-400">+</button>
+                    </div>
+                </div>
+                <div class="space-y-4">
+                    <label class="text-[10px] text-slate-500 font-black uppercase text-center block tracking-widest">Losses</label>
+                    <div class="flex items-center gap-3">
+                        <button type="button" onclick="step('losses', -1)" class="stepper-btn">-</button>
+                        <input type="number" id="losses" required value="0" class="text-2xl font-black">
+                        <button type="button" onclick="step('losses', 1)" class="stepper-btn text-rose-400">+</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-6">
+                <div class="space-y-2"><label class="text-[10px] text-slate-600 font-black uppercase px-2 tracking-[0.2em]">PF Rating</label><input type="number" id="pf" step="0.01" value="0" class="text-sm !py-2.5"></div>
+                <div class="space-y-2"><label class="text-[10px] text-slate-600 font-black uppercase px-2 tracking-[0.2em]">Drawdown %</label><input type="number" id="dd" step="0.01" value="0" class="text-sm !py-2.5"></div>
+            </div>
+
+            <div class="flex gap-5">
+                <button type="button" onclick="toggleModal(false)" class="flex-1 bg-white/5 py-6 rounded-3xl font-black uppercase text-xs tracking-[0.3em] text-slate-500 hover:bg-white/10 transition-all">Back</button>
+                <button type="submit" id="submitBtn" class="flex-[2] btn-gradient py-6 rounded-3xl font-black uppercase text-xs tracking-[0.3em] text-white active:scale-95 transition-all">Confirm Deploy</button>
+            </div>
+        </form>
+    </div>
+
+    <!-- UI Overlay Systems -->
+    <div id="loader" class="hidden fixed inset-0 bg-black/95 backdrop-blur-3xl z-[100] flex flex-col items-center justify-center">
+        <div class="relative w-24 h-24">
+            <div class="absolute inset-0 border-[3px] border-emerald-500/10 rounded-full"></div>
+            <div class="absolute inset-0 border-[3px] border-t-emerald-500 rounded-full animate-spin"></div>
+        </div>
+        <p class="text-[11px] font-black uppercase tracking-[0.6em] text-emerald-500 mt-10 animate-pulse">Establishing Secure Sync</p>
+    </div>
+
+    <div id="toast" style="opacity: 0; transform: translate(-50%, 50px);" class="fixed bottom-32 left-1/2 glass px-10 py-5 rounded-full z-50 bg-emerald-600/95 shadow-2xl border border-white/20 transition-all duration-500">
+        <span id="toastMsg" class="text-xs font-black uppercase text-white tracking-[0.3em]">Ready</span>
     </div>
 
     <script>
-        // 🔗 ลิงก์ Web App ที่คุณส่งมา
         const SHEETS_URL = 'https://script.google.com/macros/s/AKfycbzkaYWyrZcyKwliZZoK5JlTvdIrCcy_tjKUVr0MPtugKCG20uu3mTs1Oqhhrzy4NSGbqA/exec';
-        
         let tradeHistory = [];
         let viewDate = new Date();
+        let stepInterval;
+
+        function toggleModal(show) {
+            const modal = document.getElementById('entryModal');
+            const overlay = document.getElementById('modalOverlay');
+            if (show) {
+                overlay.classList.remove('hidden');
+                setTimeout(() => { overlay.style.opacity = "1"; modal.classList.add('active'); }, 10);
+            } else {
+                modal.classList.remove('active');
+                overlay.style.opacity = "0";
+                setTimeout(() => overlay.classList.add('hidden'), 500);
+            }
+        }
+
+        function startStep(id, val) {
+            step(id, val);
+            stepInterval = setInterval(() => step(id, val), 120);
+        }
+        function stopStep() { clearInterval(stepInterval); }
+
+        function step(id, val) {
+            const el = document.getElementById(id);
+            let current = parseFloat(el.value) || 0;
+            if (id === 'profit' || id === 'capital') {
+                el.value = (current + val).toFixed(2);
+            } else {
+                el.value = Math.max(0, current + val);
+            }
+        }
 
         async function fetchData() {
             document.getElementById('loader').classList.remove('hidden');
             try {
                 const response = await fetch(SHEETS_URL);
-                tradeHistory = await response.json();
+                const data = await response.json();
+                tradeHistory = Array.isArray(data) ? data : [];
                 updateUI();
-                showToast("Synced ✅");
-            } catch (err) {
-                showToast("Sync Error ❌");
-                console.error(err);
-            }
+                showToast("LIVE SYNC COMPLETE ✅");
+            } catch (err) { showToast("SYNC ERROR ❌"); }
             document.getElementById('loader').classList.add('hidden');
         }
 
         async function saveToSheet(e) {
             e.preventDefault();
-            const date = document.getElementById('tradeDate').value;
+            const profit = parseFloat(document.getElementById('profit').value);
             const record = {
-                rawDate: date,
-                date: new Date(date).toLocaleDateString('th-TH'),
+                rawDate: document.getElementById('tradeDate').value,
+                date: new Date(document.getElementById('tradeDate').value).toLocaleDateString('th-TH'),
                 capital: parseFloat(document.getElementById('capital').value),
-                profit: parseFloat(document.getElementById('profit').value),
+                profit: profit,
                 wins: parseInt(document.getElementById('wins').value),
                 losses: parseInt(document.getElementById('losses').value),
                 pf: parseFloat(document.getElementById('pf').value) || 0,
@@ -128,35 +328,63 @@
 
             document.getElementById('loader').classList.remove('hidden');
             try {
-                await fetch(SHEETS_URL, {
-                    method: 'POST',
-                    mode: 'no-cors',
-                    body: JSON.stringify(record)
-                });
-                showToast("Data Sent ✅");
-                setTimeout(fetchData, 1500); // Reload after 1.5s
-                document.getElementById('tradeForm').reset();
-                document.getElementById('tradeDate').valueAsDate = new Date();
-            } catch (err) {
-                showToast("Save Error ❌");
-            }
+                await fetch(SHEETS_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(record) });
+                if(profit > 0) celebrate();
+                showToast("DATA DEPLOYED ✅");
+                toggleModal(false);
+                setTimeout(fetchData, 1500); 
+                resetInputs();
+            } catch (err) { showToast("DEPLOY FAILED ❌"); }
             document.getElementById('loader').classList.add('hidden');
+        }
+
+        function resetInputs() {
+            document.getElementById('tradeForm').reset();
+            document.getElementById('tradeDate').valueAsDate = new Date();
+            document.getElementById('capital').value = 30;
         }
 
         function updateUI() {
             let p=0, w=0, l=0, dd=0, pf=0;
+            const historyList = document.getElementById('historyList');
+            historyList.innerHTML = '';
+            
+            const sorted = [...tradeHistory].sort((a, b) => new Date(b.rawDate) - new Date(a.rawDate));
+            document.getElementById('logCount').innerText = `${tradeHistory.length} SECURED RECORDS`;
+
             tradeHistory.forEach(r => { 
-                const pr = parseFloat(r.profit);
-                p += pr; 
-                w += parseInt(r.wins); 
-                l += parseInt(r.losses); 
+                const pr = parseFloat(r.profit) || 0;
+                p += pr; w += parseInt(r.wins) || 0; l += parseInt(r.losses) || 0; 
                 if(parseFloat(r.dd) > dd) dd = parseFloat(r.dd); 
-                pf += parseFloat(r.pf); 
+                pf += parseFloat(r.pf) || 0; 
             });
+
             document.getElementById('totalP').innerText = `$${p.toFixed(2)}`;
             document.getElementById('winR').innerText = (w+l)>0 ? (w/(w+l)*100).toFixed(1)+'%' : '0%';
             document.getElementById('maxD').innerText = dd.toFixed(1)+'%';
             document.getElementById('avgP').innerText = tradeHistory.length>0 ? (pf/tradeHistory.length).toFixed(2) : '0.00';
+
+            sorted.slice(0, 8).forEach(r => {
+                const pr = parseFloat(r.profit) || 0;
+                const div = document.createElement('div');
+                div.className = "flex justify-between items-center p-6 rounded-[2rem] bg-white/5 border border-white/5 hover:bg-white/10 active:scale-95 transition-all cursor-pointer";
+                div.onclick = () => fillForm(r);
+                div.innerHTML = `
+                    <div class="flex items-center gap-4">
+                        <div class="w-12 h-12 rounded-2xl flex items-center justify-center ${pr >= 0 ? 'bg-emerald-500/10 text-emerald-400' : 'bg-rose-500/10 text-rose-400'} border border-white/5 shadow-inner">
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="${pr>=0 ? 'M12 19V5M5 12l7-7 7 7' : 'M12 5v14M5 12l7 7 7-7'}"/></svg>
+                        </div>
+                        <div>
+                            <p class="text-xs font-black text-white">${new Date(r.rawDate).toLocaleDateString('en-GB', {day:'numeric', month:'short'})}</p>
+                            <p class="text-[9px] text-slate-500 uppercase font-black mt-0.5">W:${r.wins} L:${r.losses} • PF ${r.pf}</p>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <p class="text-xl font-black font-mono ${pr >= 0 ? 'text-emerald-400' : 'text-rose-400'}">${pr >= 0 ? '+' : ''}${pr.toFixed(2)}</p>
+                    </div>
+                `;
+                historyList.appendChild(div);
+            });
             renderCalendar();
         }
 
@@ -166,43 +394,57 @@
             document.getElementById('calMonth').innerText = new Intl.DateTimeFormat('th-TH',{month:'long',year:'numeric'}).format(viewDate);
             const first = new Date(y, m, 1).getDay(), days = new Date(y, m+1, 0).getDate();
             for(let i=0; i<first; i++) body.appendChild(document.createElement('div'));
+            
             for(let d=1; d<=days; d++) {
-                const ds = `${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-                const t = tradeHistory.filter(x => x.rawDate === ds);
+                const dayStr = `${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+                const t = tradeHistory.find(x => x.rawDate && x.rawDate.toString().includes(dayStr));
                 const div = document.createElement('div');
-                div.className = "min-h-[85px] md:min-h-[120px] p-2 rounded-2xl border border-white/5 bg-white/5 flex flex-col justify-between cursor-pointer active:scale-95 transition-all hover:bg-white/10 shadow-lg";
-                if(t.length > 0) {
-                    const win = parseFloat(t[0].profit) >= 0;
-                    div.className += win ? " border-emerald-500/40 bg-emerald-500/10 shadow-emerald-900/5" : " border-rose-500/40 bg-rose-500/10 shadow-rose-900/5";
-                    div.innerHTML = `<span class="text-[11px] font-black ${win?'text-emerald-400':'text-rose-400'}">${d}</span>
-                                     <p class="text-center text-xs md:text-xl font-black ${win?'text-emerald-400':'text-rose-400'} font-mono">${win?'+':''}${Math.round(t[0].profit)}</p>
-                                     <div class="h-1 w-full bg-white/10 rounded-full overflow-hidden"><div class="h-full ${win?'bg-emerald-500':'bg-rose-500'}" style="width: 80%"></div></div>`;
-                    div.onclick = () => {
-                        document.getElementById('tradeDate').value = t[0].rawDate;
-                        document.getElementById('capital').value = t[0].capital;
-                        document.getElementById('profit').value = t[0].profit;
-                        document.getElementById('wins').value = t[0].wins;
-                        document.getElementById('losses').value = t[0].losses;
-                        document.getElementById('pf').value = t[0].pf;
-                        document.getElementById('dd').value = t[0].dd;
-                        window.scrollTo({top:0, behavior:'smooth'});
-                    };
+                div.className = "day-card glass flex flex-col items-center justify-center border border-white/5";
+                
+                if(t) {
+                    const profit = parseFloat(t.profit) || 0;
+                    const isWin = profit >= 0;
+                    const winP = (parseInt(t.wins) / (parseInt(t.wins) + parseInt(t.losses)) * 100) || 0;
+                    
+                    if(isWin) div.classList.add('heat-glow-win'); else div.classList.add('heat-glow-loss');
+
+                    div.innerHTML = `
+                        <span class="absolute top-2 left-2 text-[10px] font-black ${isWin?'text-emerald-400/50':'text-rose-400/50'}">${d}</span>
+                        <p class="text-center text-[12px] md:text-lg font-black ${isWin?'text-emerald-400':'text-rose-400'} font-mono">${Math.round(profit)}</p>
+                        <div class="p-bar-container">
+                            <div class="p-bar-fill ${isWin?'bg-emerald-500':'bg-rose-500'}" style="width: ${winP}%"></div>
+                        </div>`;
+                    div.onclick = () => fillForm(t);
                 } else {
-                    div.innerHTML = `<span class="text-[10px] font-black opacity-20">${d}</span>`;
-                    div.onclick = () => { document.getElementById('tradeDate').value = ds; };
+                    div.innerHTML = `<span class="absolute top-2 left-2 text-[10px] font-black opacity-20">${d}</span>`;
+                    div.onclick = () => { document.getElementById('tradeDate').value = dayStr; toggleModal(true); };
                 }
                 body.appendChild(div);
             }
+        }
+
+        function fillForm(r) {
+            document.getElementById('tradeDate').value = r.rawDate.split('T')[0];
+            document.getElementById('capital').value = r.capital;
+            document.getElementById('profit').value = r.profit;
+            document.getElementById('wins').value = r.wins;
+            document.getElementById('losses').value = r.losses;
+            document.getElementById('pf').value = r.pf;
+            document.getElementById('dd').value = r.dd;
+            toggleModal(true);
+        }
+
+        function celebrate() {
+            confetti({ particleCount: 160, spread: 80, origin: { y: 0.7 }, colors: ['#10b981', '#6ee7b7', '#ffffff', '#fbbf24'] });
         }
 
         window.changeMonth = (o) => { viewDate.setMonth(viewDate.getMonth() + o); renderCalendar(); };
         function showToast(m) {
             const t = document.getElementById('toast'); document.getElementById('toastMsg').innerText = m;
             t.style.opacity = "1"; t.style.transform = "translate(-50%, 0)";
-            setTimeout(() => { t.style.opacity = "0"; t.style.transform = "translate(-50%, 50px)"; }, 2500);
+            setTimeout(() => { t.style.opacity = "0"; t.style.transform = "translate(-50%, 50px)"; }, 3000);
         }
 
-        // Init
         document.getElementById('tradeDate').valueAsDate = new Date();
         fetchData();
     </script>
