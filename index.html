@@ -3,283 +3,298 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Apex Elite - Data Scientist v19.0</title>
+    <title>Apex Elite - The Oracle Awakening v22.1</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;800&family=JetBrains+Mono:wght@700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Kanit:wght@100;300;400;500;600;800&family=JetBrains+Mono:wght@700&display=swap');
         
         :root {
-            --primary: #10b981;
-            --primary-glow: rgba(16, 185, 129, 0.4);
-            --bg: #010409;
-            --surface: rgba(13, 20, 33, 0.9);
-            --border: rgba(255, 255, 255, 0.08);
+            --mystic-primary: #7c3aed;
+            --mystic-accent: #c026d3;
+            --mystic-glow: rgba(124, 58, 237, 0.4);
+            --success: #10b981;
+            --danger: #f43f5e;
+            --bg-dark: #060211;
+            --glass-bg: rgba(22, 10, 45, 0.85);
         }
 
         body { 
             font-family: 'Kanit', sans-serif; 
-            background: var(--bg);
+            background: var(--bg-dark);
             background-image: 
-                radial-gradient(circle at 0% 0%, rgba(16, 185, 129, 0.15) 0%, transparent 40%),
-                radial-gradient(circle at 100% 100%, rgba(59, 130, 246, 0.1) 0%, transparent 40%);
+                radial-gradient(circle at 5% 5%, rgba(124, 58, 237, 0.2) 0%, transparent 40%),
+                radial-gradient(circle at 95% 95%, rgba(192, 38, 211, 0.15) 0%, transparent 40%),
+                linear-gradient(rgba(124, 58, 237, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(124, 58, 237, 0.03) 1px, transparent 1px);
+            background-size: 100% 100%, 100% 100%, 45px 45px, 45px 45px;
             color: #f1f5f9; 
             overflow-x: hidden;
             min-height: 100vh;
         }
 
         .glass { 
-            background: var(--surface); 
-            backdrop-filter: blur(24px) saturate(180%); 
-            border: 1px solid var(--border); 
-            box-shadow: 0 25px 80px -20px rgba(0, 0, 0, 0.8);
-            border-radius: 2.5rem;
+            background: var(--glass-bg); 
+            backdrop-filter: blur(30px) saturate(170%); 
+            border: 1px solid rgba(124, 58, 237, 0.2); 
+            box-shadow: 0 25px 80px -20px rgba(0, 0, 0, 1), inset 0 0 30px rgba(124, 58, 237, 0.08);
+            border-radius: 2.8rem;
+            position: relative;
         }
 
+        @keyframes oracle-reveal {
+            0% { filter: brightness(2) blur(8px); opacity: 0; transform: scale(0.97); }
+            100% { filter: brightness(1) blur(0); opacity: 1; transform: scale(1); }
+        }
+        .reveal-node { animation: oracle-reveal 1s cubic-bezier(0.22, 1, 0.36, 1) forwards; }
+
         .bottom-sheet { 
-            transition: all 0.6s cubic-bezier(0.22, 1, 0.36, 1); 
+            transition: all 0.7s cubic-bezier(0.16, 1, 0.3, 1); 
             transform: translateY(100%); 
+            background: linear-gradient(180deg, #1a0b35 0%, #060211 100%);
+            border-top: 2px solid var(--mystic-primary);
+            box-shadow: 0 -20px 60px rgba(0,0,0,0.8);
         }
         .bottom-sheet.active { transform: translateY(0); }
 
         input, select { 
-            background: rgba(0, 0, 0, 0.5) !important; 
-            border: 1px solid rgba(255, 255, 255, 0.1) !important; 
+            background: rgba(0, 0, 0, 0.7) !important; 
+            border: 1px solid rgba(124, 58, 237, 0.35) !important; 
             color: #fff !important; 
             outline: none; 
-            border-radius: 1rem !important; 
-            padding: 0.8rem !important; 
+            border-radius: 1.4rem !important; 
+            padding: 1.2rem !important; 
             width: 100%; 
             text-align: center; 
             font-family: 'JetBrains Mono', monospace;
-            font-size: 0.95rem;
-            transition: all 0.3s;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         }
-        input:focus, select:focus { border-color: var(--primary) !important; box-shadow: 0 0 15px var(--primary-glow); }
+        input:focus { border-color: var(--mystic-accent) !important; box-shadow: 0 0 25px rgba(192, 38, 211, 0.4); transform: translateY(-2px); }
 
         .filter-chip {
-            padding: 8px 20px; border-radius: 14px; font-size: 11px; font-weight: 700; text-transform: uppercase;
-            letter-spacing: 1px; transition: all 0.4s; border: 1px solid transparent; color: #94a3b8; background: rgba(255,255,255,0.03);
+            padding: 10px 22px; border-radius: 18px; font-size: 11px; font-weight: 700; text-transform: uppercase;
+            letter-spacing: 1.5px; transition: all 0.4s; 
+            border: 1px solid rgba(124, 58, 237, 0.1); color: #64748b; background: rgba(255,255,255,0.02);
         }
-        .filter-chip.active { background: rgba(16, 185, 129, 0.2); color: var(--primary); border-color: rgba(16, 185, 129, 0.4); }
+        .filter-chip.active { 
+            background: linear-gradient(135deg, rgba(124, 58, 237, 0.35), rgba(192, 38, 211, 0.25)); 
+            color: #fff; border-color: var(--mystic-primary); 
+            box-shadow: 0 8px 25px -5px rgba(124, 58, 237, 0.5);
+        }
 
-        .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 10px; }
-        @media (max-width: 640px) { .cal-grid { gap: 6px; } }
+        .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 12px; }
+        @media (max-width: 640px) { .cal-grid { gap: 8px; } }
 
         .day-card {
-            aspect-ratio: 1/1.3; transition: all 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
-            position: relative; background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 1.5rem;
+            aspect-ratio: 1/1.3; transition: all 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
+            position: relative; background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(124, 58, 237, 0.15); border-radius: 1.8rem;
+        }
+        .day-card:active { transform: scale(0.9); }
+
+        .p-bar-container { position: absolute; bottom: 10px; left: 10px; right: 10px; height: 5px; background: rgba(255,255,255,0.05); border-radius: 10px; overflow: hidden; }
+        .p-bar-fill { height: 100%; transition: width 2s cubic-bezier(0.2, 0.8, 0.2, 1); border-radius: 10px; }
+
+        .metric-card { 
+            cursor: pointer; transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1); 
+            border-bottom: 4px solid transparent;
+            background: linear-gradient(180deg, rgba(124, 58, 237, 0.08) 0%, transparent 100%);
+        }
+        .metric-card:active { transform: scale(0.96); }
+        .metric-card:hover { border-bottom-color: var(--mystic-primary); background: rgba(124, 58, 237, 0.12); transform: translateY(-5px); }
+
+        @keyframes pulse-oracle {
+            0%, 100% { box-shadow: 0 0 15px rgba(124, 58, 237, 0.2); }
+            50% { box-shadow: 0 0 35px rgba(192, 38, 211, 0.5); }
+        }
+        .glow-oracle { animation: pulse-oracle 4s infinite; }
+
+        .btn-oracle {
+            background: linear-gradient(135deg, #6d28d9 0%, #a21caf 100%);
+            box-shadow: 0 15px 35px rgba(109, 40, 217, 0.4);
+            border: 1px solid rgba(255,255,255,0.15);
         }
 
-        .p-bar-container { position: absolute; bottom: 8px; left: 8px; right: 8px; height: 4px; background: rgba(255,255,255,0.05); border-radius: 10px; overflow: hidden; }
-        .p-bar-fill { height: 100%; transition: width 1.2s ease; border-radius: 10px; }
-
-        .metric-card { cursor: pointer; transition: all 0.5s; border-top: 3px solid transparent; }
-        .metric-card:hover { border-top-color: var(--primary); background: rgba(255,255,255,0.02); }
-
-        .form-section { background: rgba(255,255,255,0.02); padding: 20px; border-radius: 2rem; border: 1px solid rgba(255,255,255,0.05); margin-bottom: 20px; }
+        .form-section { background: rgba(0,0,0,0.5); padding: 28px; border-radius: 2.8rem; border: 1px solid rgba(124, 58, 237, 0.15); margin-bottom: 28px; }
         
         .no-scrollbar::-webkit-scrollbar { display: none; }
     </style>
 </head>
-<body class="safe-area-inset-bottom pb-40">
+<body class="safe-area-inset-bottom pb-48">
 
     <div class="p-4 md:p-10 max-w-6xl mx-auto">
         
-        <!-- Header -->
-        <header class="flex justify-between items-center mb-10 pt-6 px-2">
-            <div class="flex items-center gap-5">
-                <div class="p-4 bg-gradient-to-br from-emerald-400 to-emerald-600 rounded-3xl shadow-2xl">
-                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+        <!-- Header: The Oracle -->
+        <header class="flex justify-between items-center mb-14 pt-8 px-2 reveal-node">
+            <div class="flex items-center gap-6">
+                <div class="relative group">
+                    <div class="absolute inset-0 bg-violet-600 blur-3xl opacity-40 animate-pulse"></div>
+                    <div class="relative p-5 bg-black border border-violet-500/50 rounded-[2rem] shadow-[0_0_40px_rgba(124,58,237,0.5)]">
+                        <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#bf00ff" stroke-width="2.5"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+                    </div>
                 </div>
                 <div>
-                    <h1 class="text-3xl font-black italic tracking-widest text-white leading-none">APEX <span class="text-emerald-500">SCIENTIST</span></h1>
-                    <div class="flex items-center gap-1.5 mt-2 bg-emerald-500/10 px-2.5 py-1 rounded-lg border border-emerald-500/20">
-                        <div class="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse shadow-[0_0_8px_#10b981]"></div>
-                        <span class="text-[9px] font-black text-emerald-400 uppercase tracking-widest">Enhanced Data Engine v19.0</span>
+                    <h1 class="text-3xl md:text-4xl font-black italic tracking-widest text-white leading-none">APEX <span class="text-violet-500 uppercase">Oracle</span></h1>
+                    <div class="flex items-center gap-2 mt-3">
+                        <div class="px-4 py-1.5 bg-violet-900/30 border border-violet-500/30 rounded-full flex items-center gap-2">
+                            <div class="w-1.5 h-1.5 bg-violet-500 rounded-full animate-ping"></div>
+                            <span class="text-[9px] font-black text-violet-300 uppercase tracking-[0.3em]">Quantum Data Analysis v22.1</span>
+                        </div>
                     </div>
                 </div>
             </div>
-            <button onclick="fetchData()" class="p-4 glass rounded-3xl active:scale-90 transition-all hover:bg-white/10 border-emerald-500/10">
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/></svg>
+            <button onclick="fetchData()" class="p-5 glass rounded-[1.8rem] active:scale-90 transition-all duration-700 hover:bg-violet-900/20">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/></svg>
             </button>
         </header>
 
         <!-- Dynamic Intelligence Filters -->
-        <div class="mb-8 px-2 flex flex-col md:flex-row md:items-center justify-between gap-4">
-            <div class="flex items-center gap-2 overflow-x-auto no-scrollbar pb-2">
+        <div class="mb-10 px-4 flex flex-col md:flex-row md:items-center justify-between gap-6 reveal-node" style="animation-delay: 0.1s">
+            <div class="flex items-center gap-3 overflow-x-auto no-scrollbar pb-2">
                 <button onclick="setFilter('all')" id="f-all" class="filter-chip active">ทั้งหมด</button>
                 <button onclick="setFilter('month')" id="f-month" class="filter-chip">เดือนนี้</button>
                 <button onclick="setFilter('week')" id="f-week" class="filter-chip">สัปดาห์นี้</button>
-                <button onclick="setFilter('custom')" id="f-custom" class="filter-chip">กำหนดเอง</button>
+                <button onclick="setFilter('custom')" id="f-custom" class="filter-chip">ระบุช่วงเวลา</button>
             </div>
-            <div id="filterLabel" class="text-[9px] font-bold text-slate-500 uppercase tracking-[0.3em] flex items-center gap-2">
-                <span class="w-1 h-1 bg-slate-500 rounded-full"></span>
-                AI Statistical Analysis
+            <div class="text-[10px] font-bold text-violet-500/70 uppercase tracking-[0.4em] flex items-center gap-3 italic">
+                <span class="w-2 h-2 bg-fuchsia-500 rounded-full shadow-[0_0_15px_#c026d3]"></span>
+                ถอดรหัสความลับอัลกอริทึมสำเร็จ
             </div>
         </div>
 
-        <!-- KPI HUD -->
-        <section id="kpiContainer" class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-12"></section>
+        <!-- 🔮 Strategic KPI HUD -->
+        <section id="kpiContainer" class="grid grid-cols-2 lg:grid-cols-4 gap-5 mb-14 reveal-node" style="animation-delay: 0.2s"></section>
 
-        <!-- Master Calendar -->
-        <div class="glass p-8 md:p-12 mb-12 border-emerald-500/10 relative overflow-hidden">
-            <div class="flex justify-between items-center mb-10 relative z-10">
+        <!-- Oracle Calendar UI -->
+        <div class="glass p-8 md:p-14 mb-14 border-violet-500/10 relative overflow-hidden reveal-node" style="animation-delay: 0.3s">
+            <div class="flex justify-between items-center mb-12 px-4 relative z-10">
                 <div class="flex flex-col">
-                    <span class="text-[10px] text-emerald-500 font-bold tracking-[0.5em] uppercase mb-1">Performance Timeline</span>
+                    <span class="text-[11px] text-violet-400 font-black tracking-[0.6em] uppercase mb-2">โครงข่ายบันทึกเวลา (Timeline)</span>
                     <h2 id="calMonth" class="text-3xl font-black text-white uppercase italic tracking-tighter">Month</h2>
                 </div>
-                <div class="flex gap-1 bg-black/40 p-1.5 rounded-2xl border border-white/5 shadow-inner">
-                    <button onclick="changeMonth(-1)" class="p-3 hover:text-emerald-400 transition-all"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="m15 18-6-6 6-6"/></svg></button>
-                    <button onclick="changeMonth(1)" class="p-3 hover:text-emerald-400 transition-all"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="m9 18 6-6-6-6"/></svg></button>
+                <div class="flex gap-2 bg-black/60 p-2 rounded-[1.5rem] border border-violet-500/20">
+                    <button onclick="changeMonth(-1)" class="p-3 hover:text-violet-400 transition-all"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="m15 18-6-6 6-6"/></svg></button>
+                    <button onclick="changeMonth(1)" class="p-3 hover:text-violet-400 transition-all"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="m9 18 6-6-6-6"/></svg></button>
                 </div>
             </div>
-            <div class="cal-grid mb-8 text-[10px] font-black text-slate-700 text-center uppercase tracking-[0.4em]">
+            <div class="cal-grid mb-10 text-[12px] font-black text-slate-700 text-center uppercase tracking-[0.5em]">
                 <div>อา</div><div>จ</div><div>อ</div><div>พ</div><div>พฤ</div><div>ศ</div><div>ส</div>
             </div>
             <div id="calBody" class="cal-grid"></div>
         </div>
 
-        <!-- History -->
-        <div>
-            <div class="flex justify-between items-end mb-6 px-6">
-                <h2 class="text-xs font-black text-white uppercase tracking-[0.6em]">Secure History Logs</h2>
-                <span class="text-[10px] text-emerald-500/50 font-bold uppercase tracking-widest" id="logCount">Initializing...</span>
+        <!-- History Records -->
+        <div class="reveal-node" style="animation-delay: 0.4s">
+            <div class="flex justify-between items-end mb-10 px-8">
+                <h2 class="text-sm font-black text-white uppercase tracking-[0.7em] opacity-80">ประวัติการบันทึกระดับสูง</h2>
+                <span class="text-[10px] text-violet-500/70 font-bold uppercase tracking-widest px-4 py-1.5 bg-violet-900/10 rounded-xl border border-violet-500/20" id="logCount">0 SECURED LOGS</span>
             </div>
-            <div id="historyList" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+            <div id="historyList" class="grid grid-cols-1 md:grid-cols-2 gap-5"></div>
         </div>
     </div>
 
-    <!-- Tactical FAB -->
-    <div class="fixed bottom-12 right-8 z-40">
-        <button onclick="toggleModal('entryModal', true)" class="w-20 h-20 bg-gradient-to-tr from-emerald-600 to-emerald-400 text-white rounded-3xl shadow-2xl flex items-center justify-center active:scale-90 transition-all border border-white/20">
-            <svg width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+    <!-- FAB: Oracle -->
+    <div class="fixed bottom-14 right-10 z-40">
+        <div class="absolute inset-0 bg-violet-600 blur-[50px] opacity-40 scale-150 animate-pulse"></div>
+        <button onclick="toggleModal('entryModal', true)" class="relative w-20 h-20 bg-gradient-to-tr from-violet-800 to-fuchsia-600 text-white rounded-[2.5rem] shadow-[0_20px_50px_rgba(124,58,237,0.6)] flex items-center justify-center active:scale-90 transition-all border border-white/20">
+            <svg width="42" height="42" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
         </button>
     </div>
 
-    <!-- 🛸 Advanced Data Entry Panel -->
-    <div id="modalOverlay" class="fixed inset-0 bg-black/90 backdrop-blur-2xl z-[50] hidden opacity-0 transition-all duration-500" onclick="closeModals()"></div>
-    <div id="entryModal" class="bottom-sheet fixed bottom-0 left-0 right-0 glass rounded-t-[4rem] z-[60] p-6 pb-12 shadow-2xl max-w-2xl mx-auto border-t border-emerald-500/30 max-h-[92vh] overflow-y-auto no-scrollbar">
-        <div class="w-20 h-1 bg-white/10 rounded-full mx-auto mb-8"></div>
-        <h2 class="text-center font-black text-emerald-400 text-xl uppercase tracking-widest mb-10">Data Entry Terminal</h2>
+    <!-- 🛸 Entry Tactical Panel -->
+    <div id="modalOverlay" class="fixed inset-0 bg-black/95 backdrop-blur-3xl z-[50] hidden opacity-0 transition-all duration-700" onclick="closeModals()"></div>
+    <div id="entryModal" class="bottom-sheet fixed bottom-0 left-0 right-0 glass rounded-t-[5rem] z-[60] p-8 pb-20 shadow-2xl max-w-2xl mx-auto border-t border-violet-500/40 max-h-[94vh] overflow-y-auto no-scrollbar">
+        <div class="w-24 h-1.5 bg-violet-500/30 rounded-full mx-auto mb-10 shadow-inner"></div>
+        <h2 class="text-center font-black text-violet-400 text-3xl uppercase tracking-[0.2em] mb-12">ป้อนข้อมูลถอดรหัส</h2>
         
-        <form id="tradeForm" onsubmit="saveToSheet(event)" class="space-y-6">
-            
-            <!-- Section 1: ข้อมูลพื้นฐาน -->
+        <form id="tradeForm" onsubmit="saveToSheet(event)" class="space-y-8 px-2 pb-10">
             <div class="form-section">
-                <div class="flex items-center gap-3 mb-6 text-emerald-400">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-                    <h3 class="text-xs font-black uppercase tracking-widest">ข้อมูลการเทรดหลัก</h3>
+                <div class="flex justify-center mb-10">
+                    <input type="date" id="tradeDate" required class="!w-fit !px-8 !py-4 !text-[13px] !bg-violet-900/20 !border-violet-500/40 !text-violet-400 !font-black uppercase shadow-2xl">
                 </div>
-                <div class="flex justify-center mb-6">
-                    <input type="date" id="tradeDate" required class="!w-fit !p-3 !text-[11px] !bg-emerald-500/5 !border-emerald-500/20 !text-emerald-400 !font-black uppercase">
+                <div class="grid grid-cols-2 gap-6">
+                    <div class="space-y-3"><label class="text-[11px] text-violet-400 font-black uppercase text-center block tracking-widest italic">กำไรสุทธิ ($)</label><input type="number" id="profit" step="0.01" required placeholder="0.00"></div>
+                    <div class="space-y-3"><label class="text-[11px] text-blue-400 font-black uppercase text-center block tracking-widest italic">เงินทุนปัจจุบัน ($)</label><input type="number" id="capital" step="0.01" required value="30"></div>
                 </div>
-                <div class="grid grid-cols-2 gap-4">
-                    <div class="space-y-2"><label class="text-[10px] text-slate-500 font-bold uppercase text-center block">กำไรสุทธิ ($)</label><input type="number" id="profit" step="0.01" required></div>
-                    <div class="space-y-2"><label class="text-[10px] text-slate-500 font-bold uppercase text-center block">เงินทุน ($)</label><input type="number" id="capital" step="0.01" required value="30"></div>
-                </div>
-                <div class="grid grid-cols-2 gap-4 mt-4">
-                    <div class="space-y-2"><label class="text-[10px] text-slate-500 font-bold uppercase text-center block">Wins (ไม้)</label><input type="number" id="wins" required value="0" onchange="autoCalc()"></div>
-                    <div class="space-y-2"><label class="text-[10px] text-slate-500 font-bold uppercase text-center block">Losses (ไม้)</label><input type="number" id="losses" required value="0" onchange="autoCalc()"></div>
+                <div class="grid grid-cols-2 gap-6 mt-6">
+                    <div class="space-y-3"><label class="text-[11px] text-slate-400 font-black uppercase text-center block tracking-widest">ไม้ที่ชนะ</label><input type="number" id="wins" required value="0" onchange="autoCalc()"></div>
+                    <div class="space-y-3"><label class="text-[11px] text-slate-400 font-black uppercase text-center block tracking-widest">ไม้ที่แพ้</label><input type="number" id="losses" required value="0" onchange="autoCalc()"></div>
                 </div>
             </div>
 
-            <!-- Section 2: สถิติรวมประสิทธิภาพ -->
             <div class="form-section">
-                <div class="flex items-center gap-3 mb-6 text-blue-400">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="12" y1="20" x2="12" y2="10"/><line x1="18" y1="20" x2="18" y2="4"/><line x1="6" y1="20" x2="6" y2="16"/></svg>
-                    <h3 class="text-xs font-black uppercase tracking-widest">ประสิทธิภาพ (Efficiency)</h3>
+                <h3 class="text-[11px] font-black text-violet-400 uppercase tracking-[0.3em] mb-8 flex items-center gap-3">
+                    <span class="w-3 h-3 bg-violet-600 rounded-full animate-pulse"></span> 
+                    มิติประสิทธิภาพ (Performance Metrics)
+                </h3>
+                <div class="grid grid-cols-2 gap-6">
+                    <div class="space-y-3"><label class="text-[11px] text-slate-500 font-bold uppercase text-center block">ค่า Profit Factor</label><input type="number" id="pf" step="0.01" value="0"></div>
+                    <div class="space-y-3"><label class="text-[11px] text-rose-500/80 font-bold uppercase text-center block">ติดลบสูงสุด (DD%)</label><input type="number" id="dd" step="0.01" value="0"></div>
                 </div>
-                <div class="grid grid-cols-2 gap-4">
-                    <div class="space-y-2"><label class="text-[10px] text-slate-500 font-bold uppercase text-center block">PF Score</label><input type="number" id="pf" step="0.01" value="0"></div>
-                    <div class="space-y-2"><label class="text-[10px] text-rose-500/80 font-bold uppercase text-center block">Max DD %</label><input type="number" id="dd" step="0.01" value="0"></div>
+                <div class="grid grid-cols-2 gap-6 mt-6">
+                    <div class="space-y-3"><label class="text-[11px] text-slate-500 font-bold uppercase text-center block">เฉลี่ยกำไร ($)</label><input type="number" id="avg_win" step="0.01" value="0"></div>
+                    <div class="space-y-3"><label class="text-[11px] text-slate-500 font-bold uppercase text-center block">เฉลี่ยขาดทุน ($)</label><input type="number" id="avg_loss" step="0.01" value="0"></div>
                 </div>
-                <div class="grid grid-cols-2 gap-4 mt-4">
-                    <div class="space-y-2"><label class="text-[10px] text-slate-500 font-bold uppercase text-center block">Total Trades</label><input type="number" id="total_trades" value="0"></div>
-                    <div class="space-y-2"><label class="text-[10px] text-slate-500 font-bold uppercase text-center block">Win Rate %</label><input type="number" id="winrate" step="0.01" value="0"></div>
-                </div>
-                <div class="grid grid-cols-2 gap-4 mt-4">
-                    <div class="space-y-2"><label class="text-[10px] text-slate-500 font-bold uppercase text-center block">Avg Win ($)</label><input type="number" id="avg_win" step="0.01" value="0"></div>
-                    <div class="space-y-2"><label class="text-[10px] text-slate-500 font-bold uppercase text-center block">Avg Loss ($)</label><input type="number" id="avg_loss" step="0.01" value="0"></div>
+                <div class="grid grid-cols-2 gap-6 mt-6">
+                    <div class="space-y-3"><label class="text-[11px] text-slate-500 font-bold uppercase text-center block">ความคาดหวัง (EV)</label><input type="number" id="expectancy" step="0.01" value="0"></div>
+                    <div class="space-y-3"><label class="text-[11px] text-slate-500 font-bold uppercase text-center block">Recovery Factor</label><input type="number" id="recovery_factor" step="0.01" value="0"></div>
                 </div>
             </div>
 
-            <!-- Section 3: วิเคราะห์ผลตอบแทนเชิงลึก -->
             <div class="form-section">
-                <div class="flex items-center gap-3 mb-6 text-amber-400">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
-                    <h3 class="text-xs font-black uppercase tracking-widest">การวิเคราะห์ขั้นสูง</h3>
+                <h3 class="text-[11px] font-black text-blue-400 uppercase tracking-[0.3em] mb-8 flex items-center gap-3">
+                    <span class="w-3 h-3 bg-blue-600 rounded-full animate-pulse"></span> 
+                    สภาวะตลาด & การเข้าทำ (Market Intelligence)
+                </h3>
+                <div class="grid grid-cols-2 gap-6">
+                    <div class="space-y-3"><label class="text-[11px] text-slate-500 font-bold uppercase text-center block">กำไร Buy ($)</label><input type="number" id="buy_profit" step="0.01" value="0"></div>
+                    <div class="space-y-3"><label class="text-[11px] text-slate-500 font-bold uppercase text-center block">กำไร Sell ($)</label><input type="number" id="sell_profit" step="0.01" value="0"></div>
                 </div>
-                <div class="grid grid-cols-2 gap-4">
-                    <div class="space-y-2"><label class="text-[10px] text-slate-500 font-bold uppercase text-center block">Expectancy</label><input type="number" id="expectancy" step="0.01" value="0"></div>
-                    <div class="space-y-2"><label class="text-[10px] text-slate-500 font-bold uppercase text-center block">Recovery Factor</label><input type="number" id="recovery_factor" step="0.01" value="0"></div>
-                </div>
-                <div class="grid grid-cols-2 gap-4 mt-4">
-                    <div class="space-y-2"><label class="text-[10px] text-slate-500 font-bold uppercase text-center block">Max Con. Win</label><input type="number" id="max_consecutive_win" value="0"></div>
-                    <div class="space-y-2"><label class="text-[10px] text-slate-500 font-bold uppercase text-center block">Max Con. Loss</label><input type="number" id="max_consecutive_loss" value="0"></div>
-                </div>
-                <div class="grid grid-cols-2 gap-4 mt-4">
-                    <div class="space-y-2"><label class="text-[10px] text-slate-500 font-bold uppercase text-center block">Buy Profit ($)</label><input type="number" id="buy_profit" step="0.01" value="0"></div>
-                    <div class="space-y-2"><label class="text-[10px] text-slate-500 font-bold uppercase text-center block">Sell Profit ($)</label><input type="number" id="sell_profit" step="0.01" value="0"></div>
-                </div>
-            </div>
-
-            <!-- Section 4: สภาวะตลาดและเวลา -->
-            <div class="form-section">
-                <div class="flex items-center gap-3 mb-6 text-indigo-400">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-                    <h3 class="text-xs font-black uppercase tracking-widest">ข้อมูลตลาด & เซสชัน</h3>
-                </div>
-                <div class="grid grid-cols-2 gap-4">
-                    <div class="space-y-2"><label class="text-[10px] text-slate-500 font-bold uppercase text-center block">Session</label>
+                <div class="grid grid-cols-2 gap-6 mt-6">
+                    <div class="space-y-3"><label class="text-[11px] text-slate-500 font-bold uppercase text-center block">เซสชันตลาด</label>
                         <select id="session">
-                            <option value="Asian">Asian (โตเกียว)</option>
-                            <option value="London">London (ลอนดอน)</option>
-                            <option value="New York">New York (นิวยอร์ก)</option>
-                            <option value="Overlap">NY/London Overlap</option>
+                            <option value="Asian">Asian (ตลาดเช้า)</option>
+                            <option value="London">London (ตลาดบ่าย)</option>
+                            <option value="New York">New York (ตลาดค่ำ)</option>
+                            <option value="Overlap">Overlap (ลอนดอน/นิวยอร์ก)</option>
                         </select>
                     </div>
-                    <div class="space-y-2"><label class="text-[10px] text-slate-500 font-bold uppercase text-center block">Market Type</label>
+                    <div class="space-y-3"><label class="text-[11px] text-slate-500 font-bold uppercase text-center block">พฤติกรรมกราฟ</label>
                         <select id="market_type">
-                            <option value="Trending">Trending (มีเทรนด์)</option>
-                            <option value="Ranging">Ranging (ไซด์เวย์)</option>
-                            <option value="Volatile">Volatile (ผันผวนสูง)</option>
+                            <option value="Trending">มีแนวโน้ม (Trending)</option>
+                            <option value="Ranging">ไซด์เวย์ (Ranging)</option>
+                            <option value="Volatile">ผันผวนสูง (Volatile)</option>
                         </select>
                     </div>
-                </div>
-                <div class="grid grid-cols-2 gap-4 mt-4">
-                    <div class="space-y-2"><label class="text-[10px] text-slate-500 font-bold uppercase text-center block">Avg Spread</label><input type="number" id="avg_spread" step="0.1" value="0"></div>
-                    <div class="space-y-2"><label class="text-[10px] text-slate-500 font-bold uppercase text-center block">Max Hold (Min)</label><input type="number" id="max_hold_minutes" value="0"></div>
                 </div>
             </div>
 
-            <button type="submit" class="w-full bg-gradient-to-r from-emerald-600 to-emerald-400 py-6 rounded-3xl font-black uppercase text-xs text-white shadow-xl active:scale-95 transition-all mt-4">Execute Data Deployment</button>
+            <input type="hidden" id="total_trades" value="0">
+            <input type="hidden" id="winrate" value="0">
+            <input type="hidden" id="max_consecutive_win" value="0">
+            <input type="hidden" id="max_consecutive_loss" value="0">
+            <input type="hidden" id="avg_spread" value="0">
+            <input type="hidden" id="max_hold_minutes" value="0">
+
+            <button type="submit" class="w-full btn-oracle py-7 rounded-[2.2rem] font-black uppercase text-sm text-white shadow-2xl active:scale-95 transition-all mt-8 tracking-[0.5em]">ดำเนินการเข้ารหัสถาวร</button>
         </form>
     </div>
 
-    <!-- 🛸 Other Modals -->
-    <div id="customFilterModal" class="bottom-sheet fixed bottom-0 left-0 right-0 glass rounded-t-[3.5rem] z-[60] p-10 pb-16 shadow-2xl max-w-lg mx-auto">
-        <h2 class="text-xl font-black text-white text-center uppercase tracking-widest mb-10 text-emerald-400">ระบุช่วงเวลาวิเคราะห์</h2>
-        <div class="grid grid-cols-2 gap-4 mb-10">
-            <div class="space-y-3"><label class="text-[10px] text-slate-500 font-black uppercase px-2">เริ่ม</label><input type="date" id="filterStart" class="!text-xs"></div>
-            <div class="space-y-3"><label class="text-[10px] text-slate-500 font-black uppercase px-2">ถึง</label><input type="date" id="filterEnd" class="!text-xs"></div>
-        </div>
-        <button onclick="applyCustomFilter()" class="w-full bg-emerald-600 py-6 rounded-3xl font-black uppercase text-xs text-white shadow-xl mb-4">ดำเนินการกรองข้อมูล</button>
-        <button onclick="toggleModal('customFilterModal', false)" class="w-full bg-white/5 py-5 rounded-3xl font-black uppercase text-[10px] text-slate-500">ย้อนกลับ</button>
+    <!-- 🛸 Metric Selector Drawer -->
+    <div id="selectorModal" class="bottom-sheet fixed bottom-0 left-0 right-0 glass rounded-t-[5rem] z-[60] p-10 pb-20 shadow-2xl max-w-2xl mx-auto border-t border-violet-500/50">
+        <div class="w-24 h-1.5 bg-violet-500/30 rounded-full mx-auto mb-10 shadow-inner"></div>
+        <h2 class="text-2xl font-black text-white text-center uppercase tracking-[0.3em] mb-12">เลือกดัชนีชี้วัดเพื่อการ <span id="activeSlotNum" class="text-fuchsia-500">ตื่นรู้</span></h2>
+        <div id="metricOptions" class="grid grid-cols-1 gap-4 max-h-[55vh] overflow-y-auto pr-6 no-scrollbar"></div>
+        <button onclick="toggleModal('selectorModal', false)" class="w-full bg-white/5 py-6 rounded-[2rem] font-black uppercase text-xs tracking-widest text-slate-500 mt-10 border border-white/10">ปิดการตั้งค่า</button>
     </div>
 
-    <div id="selectorModal" class="bottom-sheet fixed bottom-0 left-0 right-0 glass rounded-t-[4rem] z-[60] p-10 pb-16 shadow-2xl max-w-2xl mx-auto">
-        <div class="w-20 h-1 bg-white/10 rounded-full mx-auto mb-10"></div>
-        <h2 class="text-xl font-black text-white text-center uppercase tracking-widest mb-10 text-emerald-400">เลือก HUD Slot <span id="activeSlotNum">1</span></h2>
-        <div id="metricOptions" class="grid grid-cols-1 gap-3 max-h-[50vh] overflow-y-auto pr-4 no-scrollbar"></div>
-    </div>
-
-    <div id="loader" class="hidden fixed inset-0 bg-black/95 backdrop-blur-3xl z-[100] flex flex-col items-center justify-center">
-        <div class="relative w-28 h-28">
-            <div class="absolute inset-0 border-[4px] border-emerald-500/10 rounded-full"></div>
-            <div class="absolute inset-0 border-[4px] border-t-emerald-500 rounded-full animate-spin"></div>
+    <!-- 🔄 Loader -->
+    <div id="loader" class="hidden fixed inset-0 bg-black/98 backdrop-blur-3xl z-[100] flex flex-col items-center justify-center">
+        <div class="relative w-36 h-36">
+            <div class="absolute inset-0 border-[8px] border-violet-900/20 rounded-full"></div>
+            <div class="absolute inset-0 border-[8px] border-t-violet-500 rounded-full animate-spin"></div>
+            <div class="absolute inset-5 border-[4px] border-b-fuchsia-500 rounded-full animate-reverse-spin" style="animation-duration: 2s"></div>
         </div>
-        <p class="text-[11px] font-black uppercase tracking-[1em] text-emerald-500 mt-12 animate-pulse">Syncing Lab Hub</p>
+        <p class="text-[11px] font-black uppercase tracking-[1.4em] text-violet-500 mt-16 animate-pulse text-center pl-4">Connecting Neural Network...</p>
     </div>
 
     <script>
@@ -291,29 +306,33 @@
         let activeSlotIdx = 0;
 
         const METRICS = {
-            profit: { label: 'Net Profit', color: 'text-emerald-400', border: 'border-emerald-500/20', format: v => `$${v.toLocaleString(undefined, {minimumFractionDigits: 2})}`, icon: '💰' },
-            winrate: { label: 'Win Rate', color: 'text-blue-400', border: 'border-blue-500/20', format: v => `${v.toFixed(1)}%`, icon: '🎯' },
-            pf: { label: 'Profit Factor', color: 'text-amber-400', border: 'border-amber-500/20', format: v => v.toFixed(2), icon: '⚖️' },
-            maxdd: { label: 'Max Drawdown', color: 'text-rose-500', border: 'border-rose-500/20', format: v => `${v.toFixed(1)}%`, icon: '📉' },
-            trades: { label: 'Total Logs', color: 'text-indigo-400', border: 'border-indigo-500/20', format: v => `${v} ไม้`, icon: '📊' },
-            growth: { label: 'Cap Growth', color: 'text-pink-400', border: 'border-pink-500/20', format: v => `${v.toFixed(1)}%`, icon: '🚀' },
-            expectancy: { label: 'Expectancy', color: 'text-cyan-400', border: 'border-cyan-500/20', format: v => `$${v.toFixed(2)}`, icon: '🧪' }
+            profit: { label: 'กำไรสุทธิสะสม', color: 'text-emerald-400', border: 'border-emerald-500/30', format: v => `$${v.toLocaleString(undefined, {minimumFractionDigits: 2})}`, icon: '💰' },
+            winrate: { label: 'อัตราการชนะรวม', color: 'text-blue-400', border: 'border-blue-500/30', format: v => `${v.toFixed(1)}%`, icon: '🎯' },
+            pf: { label: 'ดัชนีความคุ้มค่า (PF)', color: 'text-amber-400', border: 'border-amber-500/30', format: v => v.toFixed(2), icon: '⚖️' },
+            maxdd: { label: 'อัตราถดถอย (DD)', color: 'text-rose-500', border: 'border-rose-500/30', format: v => `${v.toFixed(1)}%`, icon: '📉' },
+            trades: { label: 'ธุรกรรมการเทรดรวม', color: 'text-violet-400', border: 'border-violet-500/30', format: v => `${v} ไม้`, icon: '📊' },
+            growth: { label: 'อัตราเติบโต ROI', color: 'text-fuchsia-400', border: 'border-fuchsia-500/30', format: v => `${v.toFixed(1)}%`, icon: '🚀' },
+            expectancy: { label: 'ดัชนีความคาดหวัง', color: 'text-cyan-400', border: 'border-cyan-500/30', format: v => `$${v.toFixed(2)}`, icon: '🧪' },
+            recovery: { label: 'อัตราฟื้นตัวพอร์ต', color: 'text-indigo-400', border: 'border-indigo-500/30', format: v => v.toFixed(2), icon: '🔄' },
+            avgWin: { label: 'กำไรเฉลี่ยต่อไม้', color: 'text-teal-400', border: 'border-teal-500/30', format: v => `$${v.toFixed(2)}`, icon: '📈' },
+            bestDay: { label: 'เพดานกำไรสูงสุด', color: 'text-lime-400', border: 'border-lime-500/30', format: v => `$${v.toFixed(2)}`, icon: '🏆' },
+            streak: { label: 'ชนะต่อเนื่องสูงสุด', color: 'text-orange-400', border: 'border-orange-500/30', format: v => `${v} ครั้ง`, icon: '🔥' }
         };
 
-        let slotPrefs = JSON.parse(localStorage.getItem('apex_v19_slots')) || ['profit', 'winrate', 'maxdd', 'pf'];
+        let slotPrefs = JSON.parse(localStorage.getItem('apex_v22_slots')) || ['profit', 'winrate', 'maxdd', 'pf'];
 
         function autoCalc() {
             const w = parseInt(document.getElementById('wins').value) || 0;
             const l = parseInt(document.getElementById('losses').value) || 0;
-            const total = w + l;
-            document.getElementById('total_trades').value = total;
-            document.getElementById('winrate').value = total > 0 ? (w / total * 100).toFixed(1) : 0;
+            document.getElementById('total_trades').value = w + l;
+            document.getElementById('winrate').value = (w+l) > 0 ? (w / (w+l) * 100).toFixed(1) : 0;
         }
 
         function normalizeDate(input) {
             if (!input) return null;
             const d = new Date(input);
-            return isNaN(d.getTime()) ? input.split('T')[0] : d.toLocaleDateString('sv-SE');
+            if (isNaN(d.getTime())) return input.split('T')[0];
+            return d.toLocaleDateString('sv-SE');
         }
 
         function toggleModal(id, show) {
@@ -330,35 +349,30 @@
         }
 
         function closeModals() {
-            toggleModal('entryModal', false); toggleModal('selectorModal', false); toggleModal('customFilterModal', false);
+            toggleModal('entryModal', false); toggleModal('selectorModal', false);
         }
 
         function setFilter(type) {
             currentFilter = type;
             document.querySelectorAll('.filter-chip').forEach(b => b.classList.remove('active'));
             document.getElementById(`f-${type}`).classList.add('active');
-            if(type === 'custom') toggleModal('customFilterModal', true); else updateUI();
-        }
-
-        function applyCustomFilter() {
-            customRange.start = document.getElementById('filterStart').value;
-            customRange.end = document.getElementById('filterEnd').value;
-            if(!customRange.start || !customRange.end) return;
-            toggleModal('customFilterModal', false);
             updateUI();
         }
 
         function openSelector(idx) {
             activeSlotIdx = idx;
-            document.getElementById('activeSlotNum').innerText = idx + 1;
+            const titleSpan = document.getElementById('activeSlotNum');
+            if (titleSpan) titleSpan.innerText = idx + 1;
+            
             const container = document.getElementById('metricOptions');
             container.innerHTML = '';
             Object.keys(METRICS).forEach(key => {
+                const isSelected = slotPrefs[idx] === key;
                 const btn = document.createElement('button');
-                btn.className = `w-full p-7 rounded-3xl text-left transition-all ${slotPrefs[idx] === key ? 'bg-emerald-500 text-white shadow-xl' : 'bg-white/5 text-slate-500'}`;
-                btn.innerHTML = `<span class="font-black text-[12px] tracking-widest">${METRICS[key].icon} ${METRICS[key].label}</span>`;
+                btn.className = `w-full p-8 rounded-[2rem] text-left transition-all ${isSelected ? 'bg-violet-600 text-white shadow-2xl' : 'bg-white/5 text-slate-500'}`;
+                btn.innerHTML = `<div class="flex justify-between items-center"><span class="font-black text-[13px] tracking-widest">${METRICS[key].icon} ${METRICS[key].label}</span></div>`;
                 btn.onclick = () => {
-                    slotPrefs[idx] = key; localStorage.setItem('apex_v19_slots', JSON.stringify(slotPrefs));
+                    slotPrefs[idx] = key; localStorage.setItem('apex_v22_slots', JSON.stringify(slotPrefs));
                     updateUI(); toggleModal('selectorModal', false);
                 };
                 container.appendChild(btn);
@@ -373,8 +387,8 @@
                 const data = await response.json();
                 tradeHistory = (Array.isArray(data) ? data : []).map(r => ({ ...r, matchDate: normalizeDate(r.rawDate) }));
                 updateUI();
-                showToast("CORE SYNCED ✅");
-            } catch (err) { showToast("OFFLINE MODE ❌"); }
+                showToast("Oracle Sync Complete ✅");
+            } catch (err) { showToast("Sync Link Failed ❌"); }
             document.getElementById('loader').classList.add('hidden');
         }
 
@@ -407,22 +421,38 @@
             toggleModal('entryModal', false);
             try {
                 await fetch(SHEETS_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(record) });
-                if(record.profit > 0) confetti({ particleCount: 200, spread: 90, origin: { y: 0.8 } });
-                showToast("DATA DEPLOYED ✅");
+                if(record.profit > 0) confetti({ particleCount: 300, spread: 120, origin: { y: 0.8 }, colors: ['#7c3aed', '#c026d3', '#ffffff'] });
+                showToast("Data Encoded Successfully ✅");
                 setTimeout(fetchData, 1500);
-            } catch (err) { showToast("DEPLOY ERROR ❌"); }
+            } catch (err) { showToast("Encoding Failed ❌"); }
         }
 
         function calculateStats() {
             const data = getFilteredData();
-            let p=0, w=0, l=0, dd=0, pfSum=0, expSum=0, startCap=30;
+            let p=0, w=0, l=0, dd=0, pfSum=0, startCap=30, recSum=0, expSum=0, best=0, streak=0, curStreak=0, totalW=0;
+            
             data.forEach((r, i) => {
-                p += parseFloat(r.profit) || 0; w += parseInt(r.wins) || 0; l += parseInt(r.losses) || 0;
+                const pr = parseFloat(r.profit) || 0;
+                p += pr; w += parseInt(r.wins) || 0; l += parseInt(r.losses) || 0;
                 if (parseFloat(r.dd) > dd) dd = parseFloat(r.dd);
-                pfSum += parseFloat(r.pf) || 0; expSum += parseFloat(r.expectancy) || 0;
+                pfSum += parseFloat(r.pf) || 0;
+                recSum += parseFloat(r.recovery_factor) || 0;
+                expSum += parseFloat(r.expectancy) || 0;
+                if (pr > best) best = pr;
+                
+                if(pr > 0) { curStreak++; if(curStreak > streak) streak = curStreak; totalW++; } else { curStreak = 0; }
                 if (i === data.length - 1) startCap = parseFloat(r.capital) || 30;
             });
-            return { profit: p, winrate: (w+l)>0 ? (w/(w+l)*100) : 0, pf: data.length > 0 ? (pfSum/data.length) : 0, maxdd: dd, trades: w+l, expectancy: data.length > 0 ? (expSum/data.length) : 0, growth: startCap > 0 ? (p/startCap*100) : 0 };
+            
+            return { 
+                profit: p, winrate: (w+l)>0 ? (w/(w+l)*100) : 0, 
+                pf: data.length > 0 ? (pfSum/data.length) : 0, 
+                maxdd: dd, trades: w+l, expectancy: data.length > 0 ? (expSum/data.length) : 0, 
+                growth: startCap > 0 ? (p/startCap*100) : 0,
+                recovery: data.length > 0 ? (recSum/data.length) : 0,
+                avgWin: totalW > 0 ? (p/totalW) : 0,
+                bestDay: best, streak: streak
+            };
         }
 
         function getFilteredData() {
@@ -430,7 +460,6 @@
             const now = new Date(); let start, end;
             if (currentFilter === 'month') { start = new Date(now.getFullYear(), now.getMonth(), 1); end = new Date(now.getFullYear(), now.getMonth() + 1, 0); }
             else if (currentFilter === 'week') { start = new Date(now); start.setDate(now.getDate() - now.getDay()); end = new Date(now); end.setDate(now.getDate() + (6 - now.getDay())); }
-            else if (currentFilter === 'custom') { start = new Date(customRange.start); end = new Date(customRange.end); }
             return tradeHistory.filter(r => { const d = new Date(r.matchDate); return d >= start && d <= end; });
         }
 
@@ -440,12 +469,16 @@
             slotPrefs.forEach((key, idx) => {
                 const cfg = METRICS[key];
                 const card = document.createElement('div');
-                card.className = `metric-card glass p-8 border-t-[3px] ${cfg.border} relative overflow-hidden group`;
+                card.className = `metric-card glass p-8 border-b-[4px] ${cfg.border} relative overflow-hidden group reveal-node`;
+                card.style.animationDelay = `${idx * 0.1}s`;
                 card.onclick = () => openSelector(idx);
                 card.innerHTML = `
-                    <p class="text-[9px] uppercase font-black tracking-widest mb-2 ${cfg.color}">${cfg.label}</p>
+                    <div class="flex justify-between items-start mb-3">
+                        <p class="text-[10px] uppercase font-black tracking-[0.25em] ${cfg.color}">${cfg.label}</p>
+                        <span class="text-[8px] opacity-20 group-hover:opacity-100 group-hover:text-violet-400 transition-all font-mono">CODE: ${key.toUpperCase()}</span>
+                    </div>
                     <h3 class="text-2xl font-black font-mono text-white tracking-tighter">${cfg.format(stats[key])}</h3>
-                    <div class="absolute -right-2 -bottom-2 opacity-[0.05] transition-all"><span class="text-7xl">${cfg.icon}</span></div>
+                    <div class="absolute -right-3 -bottom-3 opacity-[0.03] group-hover:opacity-10 transition-all transform group-hover:scale-125 group-hover:-rotate-12"><span class="text-8xl">${cfg.icon}</span></div>
                 `;
                 container.appendChild(card);
             });
@@ -455,19 +488,19 @@
             [...tradeHistory].sort((a,b) => new Date(b.rawDate) - new Date(a.rawDate)).slice(0, 8).forEach(r => {
                 const pr = parseFloat(r.profit) || 0;
                 const div = document.createElement('div');
-                div.className = "flex justify-between items-center p-7 glass border border-white/5 active:scale-95 transition-all cursor-pointer hover:bg-white/5";
+                div.className = "flex justify-between items-center p-8 glass border border-violet-500/10 active:scale-95 transition-all cursor-pointer hover:bg-violet-600/10";
                 div.onclick = () => { fillForm(r); toggleModal('entryModal', true); };
                 div.innerHTML = `
-                    <div class="flex items-center gap-4">
-                        <div class="w-12 h-12 rounded-2xl flex items-center justify-center ${pr >= 0 ? 'bg-emerald-500/10 text-emerald-400' : 'bg-rose-500/10 text-rose-400'} border border-white/5 shadow-inner">
-                            <span class="font-black text-[10px]">${r.session ? r.session.substring(0,2).toUpperCase() : 'FX'}</span>
+                    <div class="flex items-center gap-5">
+                        <div class="w-14 h-14 rounded-3xl flex items-center justify-center ${pr >= 0 ? 'bg-violet-900/40 text-violet-400' : 'bg-rose-500/10 text-rose-400'} border border-violet-500/30 shadow-inner">
+                             <span class="font-black text-[11px]">${r.session ? r.session.substring(0,2).toUpperCase() : 'FX'}</span>
                         </div>
                         <div>
-                            <p class="text-[13px] font-black text-white">${new Date(r.rawDate).toLocaleDateString('th-TH', {day:'numeric', month:'short'})}</p>
-                            <p class="text-[9px] text-slate-500 font-bold uppercase tracking-widest">${r.market_type || 'Market'} • W/L: ${r.wins}/${r.losses}</p>
+                            <p class="text-[15px] font-black text-white leading-none mb-2">${new Date(r.rawDate).toLocaleDateString('th-TH', {day:'numeric', month:'short'})}</p>
+                            <p class="text-[10px] text-slate-500 font-bold uppercase tracking-widest">${r.market_type || 'Market'} • W/L: ${r.wins}/${r.losses}</p>
                         </div>
                     </div>
-                    <p class="text-xl font-black font-mono ${pr >= 0 ? 'text-emerald-400' : 'text-rose-400'}">${pr>=0?'+':''}${pr.toFixed(2)}</p>
+                    <p class="text-2xl font-black font-mono ${pr >= 0 ? 'text-emerald-400' : 'text-rose-400'}">${pr>=0?'+':''}${pr.toFixed(2)}</p>
                 `;
                 list.appendChild(div);
             });
@@ -484,18 +517,18 @@
                 const dStr = `${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
                 const t = tradeHistory.find(x => x.matchDate === dStr);
                 const div = document.createElement('div');
-                div.className = "day-card flex flex-col items-center justify-center cursor-pointer";
+                div.className = "day-card glass border border-violet-500/10 flex flex-col items-center justify-center cursor-pointer";
                 if(t) {
                     const pr = parseFloat(t.profit) || 0; const isWin = pr >= 0;
-                    if(isWin) div.classList.add('win-glow');
+                    if(isWin) div.classList.add('glow-oracle');
                     div.innerHTML = `
-                        <span class="absolute top-2.5 left-2.5 text-[9px] font-black ${isWin?'text-emerald-400/50':'text-rose-400/50'}">${d}</span>
-                        <p class="text-center text-[11px] md:text-lg font-black font-mono ${isWin?'text-emerald-400':'text-rose-400'}">${Math.round(pr)}</p>
-                        <div class="p-bar-container"><div class="p-bar-fill ${isWin?'bg-emerald-400':'bg-rose-500'}" style="width: ${t.winrate||0}%"></div></div>
+                        <span class="absolute top-3 left-3 text-[10px] font-black ${isWin?'text-violet-400/50':'text-rose-400/50'}">${d}</span>
+                        <p class="text-center text-[12px] md:text-xl font-black font-mono ${isWin?'text-emerald-400':'text-rose-400'}">${Math.round(pr)}</p>
+                        <div class="p-bar-container"><div class="p-bar-fill ${isWin?'bg-emerald-500':'bg-rose-500'}" style="width: ${t.winrate||0}%"></div></div>
                     `;
                     div.onclick = () => { fillForm(t); toggleModal('entryModal', true); };
                 } else {
-                    div.innerHTML = `<span class="absolute top-2.5 left-2.5 text-[9px] font-black opacity-10">${d}</span>`;
+                    div.innerHTML = `<span class="absolute top-3 left-3 text-[10px] font-black opacity-10">${d}</span>`;
                     div.onclick = () => { document.getElementById('tradeDate').value = dStr; toggleModal('entryModal', true); };
                 }
                 body.appendChild(div);
@@ -510,28 +543,22 @@
             document.getElementById('losses').value = r.losses || 0;
             document.getElementById('pf').value = r.pf || 0;
             document.getElementById('dd').value = r.dd || 0;
-            document.getElementById('total_trades').value = r.total_trades || 0;
-            document.getElementById('winrate').value = r.winrate || 0;
             document.getElementById('avg_win').value = r.avg_win || 0;
             document.getElementById('avg_loss').value = r.avg_loss || 0;
-            document.getElementById('expectancy').value = r.expectancy || 0;
-            document.getElementById('recovery_factor').value = r.recovery_factor || 0;
-            document.getElementById('max_consecutive_win').value = r.max_consecutive_win || 0;
-            document.getElementById('max_consecutive_loss').value = r.max_consecutive_loss || 0;
             document.getElementById('buy_profit').value = r.buy_profit || 0;
             document.getElementById('sell_profit').value = r.sell_profit || 0;
             document.getElementById('session').value = r.session || "Asian";
             document.getElementById('market_type').value = r.market_type || "Trending";
-            document.getElementById('avg_spread').value = r.avg_spread || 0;
-            document.getElementById('max_hold_minutes').value = r.max_hold_minutes || 0;
+            document.getElementById('expectancy').value = r.expectancy || 0;
+            document.getElementById('recovery_factor').value = r.recovery_factor || 0;
         }
 
         function showToast(m) {
             const t = document.getElementById('toast') || document.createElement('div');
-            t.id = 'toast'; t.className = "fixed bottom-36 left-1/2 -translate-x-1/2 glass px-12 py-5 rounded-full z-[100] text-[10px] font-black uppercase transition-all duration-500 opacity-0 pointer-events-none text-emerald-400 border-emerald-500/20";
+            t.id = 'toast'; t.className = "fixed bottom-40 left-1/2 -translate-x-1/2 glass px-12 py-5 rounded-full z-[100] text-[12px] font-black uppercase tracking-[0.3em] transition-all duration-700 opacity-0 pointer-events-none text-violet-400 border-violet-500/40 shadow-[0_0_40px_rgba(124,58,237,0.4)]";
             t.innerText = m; if(!document.getElementById('toast')) document.body.appendChild(t);
             t.style.opacity = "1"; t.style.transform = "translate(-50%, 0)";
-            setTimeout(() => { t.style.opacity = "0"; t.style.transform = "translate(-50%, 40px)"; }, 3000);
+            setTimeout(() => { t.style.opacity = "0"; t.style.transform = "translate(-50%, 50px)"; }, 3500);
         }
 
         window.changeMonth = (o) => { viewDate.setMonth(viewDate.getMonth() + o); renderCalendar(); };
