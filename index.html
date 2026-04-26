@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Apex Elite - Premium Sync v13.1</title>
+    <title>Apex Elite Master - Final Fix v13.2</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <style>
@@ -13,28 +13,29 @@
             --primary: #10b981;
             --danger: #f43f5e;
             --bg: #020617;
+            --card-bg: rgba(15, 23, 42, 0.7);
         }
 
         body { 
             font-family: 'Kanit', sans-serif; 
             background: var(--bg);
             background-image: 
-                radial-gradient(at 0% 0%, rgba(16, 185, 129, 0.08) 0px, transparent 40%),
-                radial-gradient(at 100% 100%, rgba(59, 130, 246, 0.08) 0px, transparent 40%);
+                radial-gradient(at 0% 0%, rgba(16, 185, 129, 0.1) 0px, transparent 40%),
+                radial-gradient(at 100% 0%, rgba(59, 130, 246, 0.08) 0px, transparent 40%);
             color: #f1f5f9; 
             overflow-x: hidden;
             min-height: 100vh;
         }
 
         .glass { 
-            background: rgba(15, 23, 42, 0.5); 
-            backdrop-filter: blur(16px); 
-            border: 1px solid rgba(255, 255, 255, 0.06); 
-            box-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.5);
+            background: var(--card-bg); 
+            backdrop-filter: blur(20px); 
+            border: 1px solid rgba(255, 255, 255, 0.08); 
+            box-shadow: 0 15px 50px -12px rgba(0, 0, 0, 0.5);
         }
 
         .bottom-sheet { 
-            transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1); 
+            transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1); 
             transform: translateY(100%); 
         }
         .bottom-sheet.active { 
@@ -42,18 +43,19 @@
         }
 
         input { 
-            background: rgba(10, 15, 25, 0.8) !important; 
+            background: rgba(10, 15, 25, 0.9) !important; 
             border: 1px solid rgba(255, 255, 255, 0.1) !important; 
             color: white !important; 
             outline: none; 
-            border-radius: 1rem !important; 
-            padding: 1rem !important; 
+            border-radius: 1.25rem !important; 
+            padding: 1.2rem !important; 
             width: 100%; 
             text-align: center; 
             font-family: 'JetBrains Mono', monospace;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            font-size: 1.25rem;
+            transition: all 0.3s ease;
         }
-        input:focus { border-color: var(--primary) !important; box-shadow: 0 0 20px rgba(16, 185, 129, 0.15); transform: translateY(-1px); }
+        input:focus { border-color: var(--primary) !important; box-shadow: 0 0 25px rgba(16, 185, 129, 0.2); }
 
         .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 10px; }
         @media (max-width: 640px) { .cal-grid { gap: 6px; } }
@@ -63,104 +65,104 @@
             transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
             position: relative;
             overflow: hidden;
-            border-radius: 1.25rem;
+            border-radius: 1.5rem;
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.04);
         }
-        .day-card:hover { transform: translateY(-4px); border-color: rgba(255,255,255,0.2); }
-        .day-card:active { transform: scale(0.92); }
+        .day-card:active { transform: scale(0.93); }
 
-        /* Progress Bar Styles */
         .p-bar-container {
             position: absolute;
-            bottom: 8px;
-            left: 8px;
-            right: 8px;
-            height: 5px;
-            background: rgba(255,255,255,0.05);
-            border-radius: 10px;
+            bottom: 10px;
+            left: 10px;
+            right: 10px;
+            height: 6px;
+            background: rgba(255,255,255,0.06);
+            border-radius: 20px;
             overflow: hidden;
         }
         .p-bar-fill {
             height: 100%;
-            transition: width 1s ease-out;
-            border-radius: 10px;
+            transition: width 1.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+            border-radius: 20px;
         }
 
         .stepper-btn { 
-            background: rgba(255, 255, 255, 0.04); 
-            border: 1px solid rgba(255,255,255,0.05);
-            width: 54px; height: 54px; 
+            background: rgba(255, 255, 255, 0.05); 
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            width: 58px; height: 58px; 
             display: flex; items-center; justify-center; 
-            border-radius: 18px; 
+            border-radius: 20px; 
             transition: all 0.2s;
         }
-        .stepper-btn:active { background: rgba(255, 255, 255, 0.12); transform: scale(0.9); }
+        .stepper-btn:active { background: rgba(255, 255, 255, 0.15); transform: scale(0.85); }
 
-        .heat-glow-win { box-shadow: inset 0 0 15px rgba(16, 185, 129, 0.1); }
-        .heat-glow-loss { box-shadow: inset 0 0 15px rgba(244, 63, 94, 0.05); }
+        .glow-win { box-shadow: inset 0 0 20px rgba(16, 185, 129, 0.08), 0 0 15px rgba(16, 185, 129, 0.03); border-color: rgba(16, 185, 129, 0.3); }
+        .glow-loss { box-shadow: inset 0 0 20px rgba(244, 63, 94, 0.05); border-color: rgba(244, 63, 94, 0.2); }
 
-        .btn-gradient {
+        .btn-premium {
             background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-            box-shadow: 0 10px 25px -5px rgba(16, 185, 129, 0.4);
+            box-shadow: 0 12px 30px -8px rgba(16, 185, 129, 0.5);
         }
     </style>
 </head>
 <body class="safe-area-inset-bottom">
 
-    <!-- 🏆 Main Container -->
+    <!-- 🏆 Main UI -->
     <div class="p-4 md:p-10 max-w-6xl mx-auto">
         
-        <!-- Premium Header -->
+        <!-- Header Section -->
         <header class="flex justify-between items-center mb-10 pt-4 px-2">
             <div class="flex items-center gap-5">
                 <div class="relative group">
-                    <div class="absolute inset-0 bg-emerald-500 blur-2xl opacity-20 group-hover:opacity-40 transition-opacity"></div>
-                    <div class="relative p-3.5 bg-gradient-to-br from-emerald-400 to-emerald-600 rounded-2xl shadow-2xl transform group-hover:rotate-6 transition-transform">
-                        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                    <div class="absolute inset-0 bg-emerald-500 blur-2xl opacity-20"></div>
+                    <div class="relative p-4 bg-gradient-to-br from-emerald-400 to-emerald-600 rounded-2xl shadow-2xl">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3.5"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
                     </div>
                 </div>
                 <div>
-                    <h1 class="text-3xl font-black italic tracking-tighter leading-none tracking-[0.05em] text-white">APEX <span class="text-emerald-500">ELITE</span></h1>
-                    <div class="flex items-center gap-2 mt-1.5 bg-white/5 py-1 px-2.5 rounded-full w-fit">
-                        <div class="w-2 h-2 bg-emerald-500 rounded-full animate-pulse shadow-[0_0_8px_#10b981]"></div>
-                        <p id="syncStatus" class="text-[9px] text-slate-400 font-bold uppercase tracking-[0.2em]">Quantum Live Sync</p>
+                    <h1 class="text-3xl font-black italic tracking-tighter leading-none tracking-widest text-white">APEX <span class="text-emerald-500">PRO</span></h1>
+                    <div class="flex items-center gap-2 mt-1.5 bg-emerald-500/10 py-1 px-3 rounded-full w-fit border border-emerald-500/20">
+                        <div class="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-ping"></div>
+                        <p id="syncStatus" class="text-[9px] text-emerald-400 font-bold uppercase tracking-[0.25em]">Cloud Master Secure</p>
                     </div>
                 </div>
             </div>
-            <button onclick="fetchData()" class="p-4 glass rounded-2xl active:rotate-180 transition-all duration-700 hover:bg-white/10">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/></svg>
+            <button onclick="fetchData()" class="p-4 glass rounded-2xl active:scale-90 transition-all hover:bg-white/10">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/></svg>
             </button>
         </header>
 
-        <!-- KPI Dashboard -->
+        <!-- KPI Scoreboard -->
         <section class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-10">
-            <div class="glass p-7 rounded-[2.5rem] relative overflow-hidden group border-t-2 border-emerald-500/20">
-                <p class="text-[10px] uppercase text-emerald-500 font-black tracking-[0.2em] mb-1">Total Profit</p>
+            <div class="glass p-7 rounded-[2.5rem] border-t-2 border-emerald-500/30">
+                <p class="text-[10px] uppercase text-emerald-500 font-black tracking-[0.2em] mb-1.5">Net Profit</p>
                 <h3 id="totalP" class="text-2xl font-black font-mono text-white">$0.00</h3>
             </div>
             <div class="glass p-7 rounded-[2.5rem] border-t-2 border-blue-500/20">
-                <p class="text-[10px] uppercase text-blue-400 font-black tracking-[0.2em] mb-1">Win Rate</p>
+                <p class="text-[10px] uppercase text-blue-400 font-black tracking-[0.2em] mb-1.5">Win Rate</p>
                 <h3 id="winR" class="text-2xl font-black font-mono text-white">0%</h3>
             </div>
             <div class="glass p-7 rounded-[2.5rem] border-t-2 border-amber-500/20">
-                <p class="text-[10px] uppercase text-amber-400 font-black tracking-[0.2em] mb-1">Avg PF</p>
+                <p class="text-[10px] uppercase text-amber-400 font-black tracking-[0.2em] mb-1.5">Avg PF</p>
                 <h3 id="avgP" class="text-2xl font-black font-mono text-white">0.00</h3>
             </div>
             <div class="glass p-7 rounded-[2.5rem] border-t-2 border-rose-500/20">
-                <p class="text-[10px] uppercase text-rose-500 font-black tracking-[0.2em] mb-1">Max DD</p>
+                <p class="text-[10px] uppercase text-rose-500 font-black tracking-[0.2em] mb-1.5">Max DD</p>
                 <h3 id="maxD" class="text-2xl font-black font-mono text-white">0%</h3>
             </div>
         </section>
 
-        <!-- 📅 Enhanced Calendar -->
-        <div class="glass p-6 md:p-10 rounded-[4rem] mb-10 border border-white/5 shadow-inner">
+        <!-- 📅 Master Calendar -->
+        <div class="glass p-6 md:p-10 rounded-[4rem] mb-10 border border-white/5">
             <div class="flex justify-between items-center mb-10 px-4">
                 <div class="flex flex-col">
-                    <span class="text-[10px] text-emerald-500 font-black tracking-[0.4em] uppercase mb-1">Calendar Overview</span>
+                    <span class="text-[10px] text-emerald-500 font-black tracking-[0.4em] uppercase mb-1">Performance Calendar</span>
                     <h2 id="calMonth" class="text-3xl font-black text-white uppercase italic tracking-tighter">Month</h2>
                 </div>
-                <div class="flex gap-3 bg-black/20 p-2 rounded-2xl border border-white/5">
-                    <button onclick="changeMonth(-1)" class="p-3 hover:bg-white/5 rounded-xl transition-all"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m15 18-6-6 6-6"/></svg></button>
-                    <button onclick="changeMonth(1)" class="p-3 hover:bg-white/5 rounded-xl transition-all"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m9 18 6-6-6-6"/></svg></button>
+                <div class="flex gap-3 bg-black/30 p-2.5 rounded-2xl border border-white/5">
+                    <button onclick="changeMonth(-1)" class="p-3 hover:bg-white/10 rounded-xl transition-all"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="m15 18-6-6 6-6"/></svg></button>
+                    <button onclick="changeMonth(1)" class="p-3 hover:bg-white/10 rounded-xl transition-all"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="m9 18 6-6-6-6"/></svg></button>
                 </div>
             </div>
             <div class="cal-grid mb-6 text-[10px] font-black text-slate-600 text-center uppercase tracking-[0.3em]">
@@ -169,54 +171,54 @@
             <div id="calBody" class="cal-grid"></div>
         </div>
 
-        <!-- Master Records -->
-        <div class="glass p-10 rounded-[4rem] mb-24 border-t border-white/5">
+        <!-- Log Records -->
+        <div class="glass p-10 rounded-[4rem] mb-28 border-t border-white/5">
             <div class="flex justify-between items-end mb-8 px-2">
-                <h2 class="text-sm font-black text-white uppercase tracking-[0.4em]">Master Logs</h2>
-                <span class="text-[10px] text-slate-500 font-bold uppercase tracking-widest" id="logCount">0 Secured Records</span>
+                <h2 class="text-sm font-black text-white uppercase tracking-[0.4em]">Activity Logs</h2>
+                <span class="text-[10px] text-slate-500 font-bold uppercase tracking-widest" id="logCount">0 Records</span>
             </div>
             <div id="historyList" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
         </div>
     </div>
 
-    <!-- ➕ Premium FAB -->
+    <!-- ➕ Premium Giant FAB -->
     <div class="fixed bottom-12 right-10 z-40">
         <div class="absolute inset-0 bg-emerald-500 blur-3xl opacity-30 scale-150 animate-pulse"></div>
         <button onclick="toggleModal(true)" class="relative w-22 h-22 p-6 bg-gradient-to-tr from-emerald-600 to-emerald-400 text-white rounded-[2.5rem] shadow-2xl flex items-center justify-center active:scale-90 active:rotate-90 transition-all duration-500 border border-white/20">
-            <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+            <svg width="42" height="42" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
         </button>
     </div>
 
-    <!--  UFO Bottom Sheet Modal -->
+    <!-- 🛸 Bottom Sheet Terminal -->
     <div id="modalOverlay" class="fixed inset-0 bg-black/85 backdrop-blur-xl z-[50] hidden opacity-0 transition-all duration-500" onclick="toggleModal(false)"></div>
     <div id="entryModal" class="bottom-sheet fixed bottom-0 left-0 right-0 glass rounded-t-[4.5rem] z-[60] p-10 pb-16 shadow-2xl max-w-2xl mx-auto border-t border-emerald-500/20">
-        <div class="w-20 h-1.5 bg-white/10 rounded-full mx-auto mb-10 shadow-inner"></div>
+        <div class="w-20 h-1.5 bg-white/10 rounded-full mx-auto mb-10"></div>
         
         <form id="tradeForm" onsubmit="saveToSheet(event)" class="space-y-10">
             <div class="flex justify-center items-center gap-4 bg-emerald-500/5 p-2 rounded-2xl w-fit mx-auto border border-emerald-500/10">
-                <input type="date" id="tradeDate" required class="!w-fit !p-2.5 !text-[11px] !bg-transparent !border-none !text-emerald-400 !font-black !uppercase tracking-widest">
+                <input type="date" id="tradeDate" required class="!w-fit !p-3 !text-[11px] !bg-transparent !border-none !text-emerald-400 !font-black uppercase tracking-[0.2em]">
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-10">
                 <div class="space-y-4">
                     <label class="text-[11px] text-emerald-400 font-black uppercase tracking-[0.3em] text-center block">Today Profit ($)</label>
                     <div class="flex items-center gap-4">
-                        <button type="button" onmousedown="startStep('profit', -10)" onmouseup="stopStep()" onmouseleave="stopStep()" class="stepper-btn text-rose-500">
+                        <button type="button" onmousedown="startStep('profit', -10)" onmouseup="stopStep()" class="stepper-btn text-rose-500">
                             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="m11 17-5-5 5-5M18 17l-5-5 5-5"/></svg>
                         </button>
-                        <input type="number" id="profit" step="0.01" required placeholder="0.00" class="text-3xl font-black !border-emerald-500/20 shadow-2xl">
-                        <button type="button" onmousedown="startStep('profit', 10)" onmouseup="stopStep()" onmouseleave="stopStep()" class="stepper-btn text-emerald-500">
+                        <input type="number" id="profit" step="0.01" required placeholder="0.00" class="text-3xl font-black">
+                        <button type="button" onmousedown="startStep('profit', 10)" onmouseup="stopStep()" class="stepper-btn text-emerald-500">
                             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="m13 17 5-5-5-5M6 17l5-5-5-5"/></svg>
                         </button>
                     </div>
                 </div>
 
                 <div class="space-y-4">
-                    <label class="text-[11px] text-blue-400 font-black uppercase tracking-[0.3em] text-center block">Deposit ($)</label>
+                    <label class="text-[11px] text-blue-400 font-black uppercase tracking-[0.3em] text-center block">Initial Capital ($)</label>
                     <div class="flex items-center gap-4">
-                        <button type="button" onclick="step('capital', -5)" class="stepper-btn text-slate-500">-</button>
+                        <button type="button" onclick="step('capital', -5)" class="stepper-btn">-</button>
                         <input type="number" id="capital" step="0.01" required value="30" class="text-3xl font-black !border-blue-500/20">
-                        <button type="button" onclick="step('capital', 5)" class="stepper-btn text-blue-500">+</button>
+                        <button type="button" onclick="step('capital', 5)" class="stepper-btn">+</button>
                     </div>
                 </div>
             </div>
@@ -241,13 +243,13 @@
             </div>
 
             <div class="grid grid-cols-2 gap-6">
-                <div class="space-y-2"><label class="text-[10px] text-slate-600 font-black uppercase px-2 tracking-[0.2em]">PF Rating</label><input type="number" id="pf" step="0.01" value="0" class="text-sm !py-2.5"></div>
-                <div class="space-y-2"><label class="text-[10px] text-slate-600 font-black uppercase px-2 tracking-[0.2em]">Drawdown %</label><input type="number" id="dd" step="0.01" value="0" class="text-sm !py-2.5"></div>
+                <div class="space-y-2"><label class="text-[10px] text-slate-600 font-black uppercase px-2 tracking-[0.2em]">PF Score</label><input type="number" id="pf" step="0.01" value="0" class="text-sm !py-3"></div>
+                <div class="space-y-2"><label class="text-[10px] text-slate-600 font-black uppercase px-2 tracking-[0.2em]">Drawdown %</label><input type="number" id="dd" step="0.01" value="0" class="text-sm !py-3"></div>
             </div>
 
             <div class="flex gap-5">
-                <button type="button" onclick="toggleModal(false)" class="flex-1 bg-white/5 py-6 rounded-3xl font-black uppercase text-xs tracking-[0.3em] text-slate-500 hover:bg-white/10 transition-all">Back</button>
-                <button type="submit" id="submitBtn" class="flex-[2] btn-gradient py-6 rounded-3xl font-black uppercase text-xs tracking-[0.3em] text-white active:scale-95 transition-all">Confirm Deploy</button>
+                <button type="button" onclick="toggleModal(false)" class="flex-1 bg-white/5 py-6 rounded-3xl font-black uppercase text-xs tracking-[0.3em] text-slate-500 hover:bg-white/10 transition-all">Cancel</button>
+                <button type="submit" id="submitBtn" class="flex-[2] btn-premium py-6 rounded-3xl font-black uppercase text-xs tracking-[0.3em] text-white active:scale-95 transition-all">Deploy Data</button>
             </div>
         </form>
     </div>
@@ -270,6 +272,14 @@
         let tradeHistory = [];
         let viewDate = new Date();
         let stepInterval;
+
+        // Fix Date matching by using local ISO standard
+        function normalizeDate(dStr) {
+            if (!dStr) return null;
+            const d = new Date(dStr);
+            if (isNaN(d.getTime())) return dStr.split('T')[0];
+            return d.toLocaleDateString('sv-SE'); // Force YYYY-MM-DD local
+        }
 
         function toggleModal(show) {
             const modal = document.getElementById('entryModal');
@@ -305,7 +315,11 @@
             try {
                 const response = await fetch(SHEETS_URL);
                 const data = await response.json();
-                tradeHistory = Array.isArray(data) ? data : [];
+                // Normalize dates from Sheets immediately
+                tradeHistory = (Array.isArray(data) ? data : []).map(r => ({
+                    ...r,
+                    matchDate: normalizeDate(r.rawDate)
+                }));
                 updateUI();
                 showToast("LIVE SYNC COMPLETE ✅");
             } catch (err) { showToast("SYNC ERROR ❌"); }
@@ -367,12 +381,12 @@
             sorted.slice(0, 8).forEach(r => {
                 const pr = parseFloat(r.profit) || 0;
                 const div = document.createElement('div');
-                div.className = "flex justify-between items-center p-6 rounded-[2rem] bg-white/5 border border-white/5 hover:bg-white/10 active:scale-95 transition-all cursor-pointer";
+                div.className = "flex justify-between items-center p-6 rounded-[2.5rem] bg-white/5 border border-white/5 hover:bg-white/10 active:scale-95 transition-all cursor-pointer shadow-inner";
                 div.onclick = () => fillForm(r);
                 div.innerHTML = `
                     <div class="flex items-center gap-4">
-                        <div class="w-12 h-12 rounded-2xl flex items-center justify-center ${pr >= 0 ? 'bg-emerald-500/10 text-emerald-400' : 'bg-rose-500/10 text-rose-400'} border border-white/5 shadow-inner">
-                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="${pr>=0 ? 'M12 19V5M5 12l7-7 7 7' : 'M12 5v14M5 12l7 7 7-7'}"/></svg>
+                        <div class="w-12 h-12 rounded-2xl flex items-center justify-center ${pr >= 0 ? 'bg-emerald-500/10 text-emerald-400' : 'bg-rose-500/10 text-rose-400'} border border-white/5">
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5"><path d="${pr>=0 ? 'M12 19V5M5 12l7-7 7 7' : 'M12 5v14M5 12l7 7 7-7'}"/></svg>
                         </div>
                         <div>
                             <p class="text-xs font-black text-white">${new Date(r.rawDate).toLocaleDateString('en-GB', {day:'numeric', month:'short'})}</p>
@@ -397,7 +411,8 @@
             
             for(let d=1; d<=days; d++) {
                 const dayStr = `${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-                const t = tradeHistory.find(x => x.rawDate && x.rawDate.toString().includes(dayStr));
+                // Direct comparison with normalized date
+                const t = tradeHistory.find(x => x.matchDate === dayStr);
                 const div = document.createElement('div');
                 div.className = "day-card glass flex flex-col items-center justify-center border border-white/5";
                 
@@ -406,17 +421,17 @@
                     const isWin = profit >= 0;
                     const winP = (parseInt(t.wins) / (parseInt(t.wins) + parseInt(t.losses)) * 100) || 0;
                     
-                    if(isWin) div.classList.add('heat-glow-win'); else div.classList.add('heat-glow-loss');
+                    if(isWin) div.classList.add('glow-win'); else div.classList.add('glow-loss');
 
                     div.innerHTML = `
-                        <span class="absolute top-2 left-2 text-[10px] font-black ${isWin?'text-emerald-400/50':'text-rose-400/50'}">${d}</span>
-                        <p class="text-center text-[12px] md:text-lg font-black ${isWin?'text-emerald-400':'text-rose-400'} font-mono">${Math.round(profit)}</p>
+                        <span class="absolute top-2.5 left-2.5 text-[9px] font-black ${isWin?'text-emerald-400/50':'text-rose-400/50'}">${d}</span>
+                        <p class="text-center text-[11px] md:text-lg font-black ${isWin?'text-emerald-400':'text-rose-400'} font-mono">${Math.round(profit)}</p>
                         <div class="p-bar-container">
                             <div class="p-bar-fill ${isWin?'bg-emerald-500':'bg-rose-500'}" style="width: ${winP}%"></div>
                         </div>`;
                     div.onclick = () => fillForm(t);
                 } else {
-                    div.innerHTML = `<span class="absolute top-2 left-2 text-[10px] font-black opacity-20">${d}</span>`;
+                    div.innerHTML = `<span class="absolute top-2.5 left-2.5 text-[9px] font-black opacity-20">${d}</span>`;
                     div.onclick = () => { document.getElementById('tradeDate').value = dayStr; toggleModal(true); };
                 }
                 body.appendChild(div);
@@ -424,7 +439,7 @@
         }
 
         function fillForm(r) {
-            document.getElementById('tradeDate').value = r.rawDate.split('T')[0];
+            document.getElementById('tradeDate').value = r.matchDate;
             document.getElementById('capital').value = r.capital;
             document.getElementById('profit').value = r.profit;
             document.getElementById('wins').value = r.wins;
@@ -435,14 +450,14 @@
         }
 
         function celebrate() {
-            confetti({ particleCount: 160, spread: 80, origin: { y: 0.7 }, colors: ['#10b981', '#6ee7b7', '#ffffff', '#fbbf24'] });
+            confetti({ particleCount: 180, spread: 80, origin: { y: 0.75 }, colors: ['#10b981', '#6ee7b7', '#ffffff', '#fbbf24'] });
         }
 
-        window.changeMonth = (o) => { viewDate.setMonth(viewDate.getMonth() + o); renderCalendar(); };
+        window.changeMonth = (o) => { viewDate.setMonth(viewDate.getMonth() + o); updateUI(); };
         function showToast(m) {
             const t = document.getElementById('toast'); document.getElementById('toastMsg').innerText = m;
             t.style.opacity = "1"; t.style.transform = "translate(-50%, 0)";
-            setTimeout(() => { t.style.opacity = "0"; t.style.transform = "translate(-50%, 50px)"; }, 3000);
+            setTimeout(() => { t.style.opacity = "0"; t.style.transform = "translate(-50%, 50px)"; }, 2500);
         }
 
         document.getElementById('tradeDate').valueAsDate = new Date();
