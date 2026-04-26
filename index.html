@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Apex Elite - Tactical v17.0</title>
+    <title>Apex Elite - Data Scientist v19.0</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <style>
@@ -13,8 +13,8 @@
             --primary: #10b981;
             --primary-glow: rgba(16, 185, 129, 0.4);
             --bg: #010409;
-            --surface: rgba(13, 20, 33, 0.85);
-            --border: rgba(255, 255, 255, 0.1);
+            --surface: rgba(13, 20, 33, 0.9);
+            --border: rgba(255, 255, 255, 0.08);
         }
 
         body { 
@@ -28,7 +28,6 @@
             min-height: 100vh;
         }
 
-        /* Tactical Glassmorphism */
         .glass { 
             background: var(--surface); 
             backdrop-filter: blur(24px) saturate(180%); 
@@ -43,136 +42,91 @@
         }
         .bottom-sheet.active { transform: translateY(0); }
 
-        input { 
-            background: rgba(0, 0, 0, 0.4) !important; 
+        input, select { 
+            background: rgba(0, 0, 0, 0.5) !important; 
             border: 1px solid rgba(255, 255, 255, 0.1) !important; 
             color: #fff !important; 
             outline: none; 
-            border-radius: 1.2rem !important; 
-            padding: 1.2rem !important; 
+            border-radius: 1rem !important; 
+            padding: 0.8rem !important; 
             width: 100%; 
             text-align: center; 
             font-family: 'JetBrains Mono', monospace;
-            font-size: 1.1rem;
+            font-size: 0.95rem;
             transition: all 0.3s;
         }
-        input:focus { border-color: var(--primary) !important; box-shadow: 0 0 20px var(--primary-glow); }
+        input:focus, select:focus { border-color: var(--primary) !important; box-shadow: 0 0 15px var(--primary-glow); }
 
-        /* Filter Chips */
         .filter-chip {
-            padding: 8px 20px;
-            border-radius: 14px;
-            font-size: 11px;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            border: 1px solid transparent;
-            color: #94a3b8;
-            background: rgba(255,255,255,0.03);
-            white-space: nowrap;
+            padding: 8px 20px; border-radius: 14px; font-size: 11px; font-weight: 700; text-transform: uppercase;
+            letter-spacing: 1px; transition: all 0.4s; border: 1px solid transparent; color: #94a3b8; background: rgba(255,255,255,0.03);
         }
-        .filter-chip.active {
-            background: linear-gradient(135deg, rgba(16, 185, 129, 0.2) 0%, rgba(16, 185, 129, 0.1) 100%);
-            color: var(--primary);
-            border-color: rgba(16, 185, 129, 0.4);
-            box-shadow: 0 8px 20px -5px var(--primary-glow);
-        }
+        .filter-chip.active { background: rgba(16, 185, 129, 0.2); color: var(--primary); border-color: rgba(16, 185, 129, 0.4); }
 
-        /* Advanced Grid */
         .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 10px; }
         @media (max-width: 640px) { .cal-grid { gap: 6px; } }
 
         .day-card {
-            aspect-ratio: 1/1.3;
-            transition: all 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
-            position: relative;
-            background: rgba(255, 255, 255, 0.02);
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            border-radius: 1.5rem;
+            aspect-ratio: 1/1.3; transition: all 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
+            position: relative; background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 1.5rem;
         }
-        .day-card:hover { transform: translateY(-3px) scale(1.02); background: rgba(255,255,255,0.05); }
-        .day-card:active { transform: scale(0.95); }
 
-        .p-bar-container {
-            position: absolute; bottom: 10px; left: 10px; right: 10px; height: 4px;
-            background: rgba(255,255,255,0.05); border-radius: 10px; overflow: hidden;
-        }
+        .p-bar-container { position: absolute; bottom: 8px; left: 8px; right: 8px; height: 4px; background: rgba(255,255,255,0.05); border-radius: 10px; overflow: hidden; }
         .p-bar-fill { height: 100%; transition: width 1.2s ease; border-radius: 10px; }
 
-        .metric-card { 
-            cursor: pointer; 
-            transition: all 0.5s cubic-bezier(0.2, 0.8, 0.2, 1); 
-            border-top: 3px solid transparent;
-        }
+        .metric-card { cursor: pointer; transition: all 0.5s; border-top: 3px solid transparent; }
         .metric-card:hover { border-top-color: var(--primary); background: rgba(255,255,255,0.02); }
 
-        /* HUD Glows */
-        @keyframes pulse-soft { 0%, 100% { opacity: 0.8; } 50% { opacity: 1; filter: brightness(1.2); } }
-        .win-glow { box-shadow: inset 0 0 25px rgba(16, 185, 129, 0.08); border-color: rgba(16, 185, 129, 0.4); }
-        .win-glow p { animation: pulse-soft 2s infinite; }
-
-        /* Scrollbar Hide */
+        .form-section { background: rgba(255,255,255,0.02); padding: 20px; border-radius: 2rem; border: 1px solid rgba(255,255,255,0.05); margin-bottom: 20px; }
+        
         .no-scrollbar::-webkit-scrollbar { display: none; }
-        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-
-        .reveal-anim { animation: reveal 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards; opacity: 0; }
-        @keyframes reveal { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
     </style>
 </head>
 <body class="safe-area-inset-bottom pb-40">
 
     <div class="p-4 md:p-10 max-w-6xl mx-auto">
         
-        <!-- Tactical Header -->
-        <header class="flex justify-between items-center mb-10 pt-6 px-2 reveal-anim" style="animation-delay: 0.1s;">
+        <!-- Header -->
+        <header class="flex justify-between items-center mb-10 pt-6 px-2">
             <div class="flex items-center gap-5">
-                <div class="relative group">
-                    <div class="absolute inset-0 bg-emerald-500 blur-3xl opacity-20 group-hover:opacity-40 transition-opacity"></div>
-                    <div class="relative p-4 bg-black border border-emerald-500/50 rounded-3xl shadow-2xl">
-                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="3"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
-                    </div>
+                <div class="p-4 bg-gradient-to-br from-emerald-400 to-emerald-600 rounded-3xl shadow-2xl">
+                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
                 </div>
                 <div>
-                    <h1 class="text-3xl font-black italic tracking-widest text-white leading-none">APEX <span class="text-emerald-500">ULTIMA</span></h1>
-                    <div class="flex items-center gap-2 mt-2">
-                        <div class="flex items-center gap-1.5 px-2.5 py-1 bg-emerald-500/10 border border-emerald-500/20 rounded-lg">
-                            <div class="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse shadow-[0_0_8px_#10b981]"></div>
-                            <span class="text-[9px] font-black text-emerald-400 uppercase tracking-widest">Core Sync Active</span>
-                        </div>
+                    <h1 class="text-3xl font-black italic tracking-widest text-white leading-none">APEX <span class="text-emerald-500">SCIENTIST</span></h1>
+                    <div class="flex items-center gap-1.5 mt-2 bg-emerald-500/10 px-2.5 py-1 rounded-lg border border-emerald-500/20">
+                        <div class="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse shadow-[0_0_8px_#10b981]"></div>
+                        <span class="text-[9px] font-black text-emerald-400 uppercase tracking-widest">Enhanced Data Engine v19.0</span>
                     </div>
                 </div>
             </div>
-            <button onclick="fetchData()" class="p-4 glass rounded-3xl active:scale-90 transition-all hover:bg-white/10 border-emerald-500/10 group">
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="group-active:rotate-180 transition-transform duration-1000"><path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/></svg>
+            <button onclick="fetchData()" class="p-4 glass rounded-3xl active:scale-90 transition-all hover:bg-white/10 border-emerald-500/10">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/></svg>
             </button>
         </header>
 
         <!-- Dynamic Intelligence Filters -->
-        <div class="mb-8 px-2 flex flex-col md:flex-row md:items-center justify-between gap-4 reveal-anim" style="animation-delay: 0.2s;">
+        <div class="mb-8 px-2 flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div class="flex items-center gap-2 overflow-x-auto no-scrollbar pb-2">
                 <button onclick="setFilter('all')" id="f-all" class="filter-chip active">ทั้งหมด</button>
                 <button onclick="setFilter('month')" id="f-month" class="filter-chip">เดือนนี้</button>
                 <button onclick="setFilter('week')" id="f-week" class="filter-chip">สัปดาห์นี้</button>
-                <button onclick="setFilter('custom')" id="f-custom" class="filter-chip">ช่วงเวลา</button>
+                <button onclick="setFilter('custom')" id="f-custom" class="filter-chip">กำหนดเอง</button>
             </div>
             <div id="filterLabel" class="text-[9px] font-bold text-slate-500 uppercase tracking-[0.3em] flex items-center gap-2">
                 <span class="w-1 h-1 bg-slate-500 rounded-full"></span>
-                Analyzed Metrics
+                AI Statistical Analysis
             </div>
         </div>
 
-        <!-- Customizable KPI HUD -->
-        <section id="kpiContainer" class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-12 reveal-anim" style="animation-delay: 0.3s;">
-            <!-- Rendered by JS -->
-        </section>
+        <!-- KPI HUD -->
+        <section id="kpiContainer" class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-12"></section>
 
-        <!-- Performance Master Calendar -->
-        <div class="glass p-8 md:p-12 mb-12 border-emerald-500/10 relative overflow-hidden reveal-anim" style="animation-delay: 0.4s;">
-            <div class="absolute -top-10 -right-10 p-12 opacity-[0.02] pointer-events-none uppercase font-black text-9xl italic">PRO</div>
+        <!-- Master Calendar -->
+        <div class="glass p-8 md:p-12 mb-12 border-emerald-500/10 relative overflow-hidden">
             <div class="flex justify-between items-center mb-10 relative z-10">
                 <div class="flex flex-col">
-                    <span class="text-[10px] text-emerald-500 font-bold tracking-[0.5em] uppercase mb-1">Tactical Timeline</span>
+                    <span class="text-[10px] text-emerald-500 font-bold tracking-[0.5em] uppercase mb-1">Performance Timeline</span>
                     <h2 id="calMonth" class="text-3xl font-black text-white uppercase italic tracking-tighter">Month</h2>
                 </div>
                 <div class="flex gap-1 bg-black/40 p-1.5 rounded-2xl border border-white/5 shadow-inner">
@@ -186,10 +140,10 @@
             <div id="calBody" class="cal-grid"></div>
         </div>
 
-        <!-- Tactical Log Section -->
-        <div class="reveal-anim" style="animation-delay: 0.5s;">
+        <!-- History -->
+        <div>
             <div class="flex justify-between items-end mb-6 px-6">
-                <h2 class="text-xs font-black text-white uppercase tracking-[0.6em]">Activity Feed</h2>
+                <h2 class="text-xs font-black text-white uppercase tracking-[0.6em]">Secure History Logs</h2>
                 <span class="text-[10px] text-emerald-500/50 font-bold uppercase tracking-widest" id="logCount">Initializing...</span>
             </div>
             <div id="historyList" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
@@ -198,58 +152,134 @@
 
     <!-- Tactical FAB -->
     <div class="fixed bottom-12 right-8 z-40">
-        <div class="absolute inset-0 bg-emerald-500 blur-3xl opacity-20 scale-150 animate-pulse"></div>
-        <button onclick="toggleModal('entryModal', true)" class="relative w-20 h-20 bg-gradient-to-tr from-emerald-600 to-emerald-400 text-white rounded-[2rem] shadow-2xl flex items-center justify-center active:scale-90 active:rotate-90 transition-all border border-white/20">
-            <svg width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+        <button onclick="toggleModal('entryModal', true)" class="w-20 h-20 bg-gradient-to-tr from-emerald-600 to-emerald-400 text-white rounded-3xl shadow-2xl flex items-center justify-center active:scale-90 transition-all border border-white/20">
+            <svg width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
         </button>
     </div>
 
-    <!-- 🛸 Entry Tactical Panel -->
+    <!-- 🛸 Advanced Data Entry Panel -->
     <div id="modalOverlay" class="fixed inset-0 bg-black/90 backdrop-blur-2xl z-[50] hidden opacity-0 transition-all duration-500" onclick="closeModals()"></div>
-    <div id="entryModal" class="bottom-sheet fixed bottom-0 left-0 right-0 glass rounded-t-[4rem] z-[60] p-10 pb-16 shadow-2xl max-w-2xl mx-auto border-t border-emerald-500/30">
-        <div class="w-20 h-1 bg-white/10 rounded-full mx-auto mb-10"></div>
-        <h2 class="text-center font-black text-emerald-400 text-2xl uppercase tracking-widest mb-10">New Data Entry</h2>
-        <form id="tradeForm" onsubmit="saveToSheet(event)" class="space-y-8">
-            <div class="flex justify-center bg-black/50 p-4 rounded-3xl border border-white/5 mb-4">
-                <input type="date" id="tradeDate" required class="!bg-transparent !border-none !text-emerald-400 !font-black !text-sm uppercase tracking-widest">
+    <div id="entryModal" class="bottom-sheet fixed bottom-0 left-0 right-0 glass rounded-t-[4rem] z-[60] p-6 pb-12 shadow-2xl max-w-2xl mx-auto border-t border-emerald-500/30 max-h-[92vh] overflow-y-auto no-scrollbar">
+        <div class="w-20 h-1 bg-white/10 rounded-full mx-auto mb-8"></div>
+        <h2 class="text-center font-black text-emerald-400 text-xl uppercase tracking-widest mb-10">Data Entry Terminal</h2>
+        
+        <form id="tradeForm" onsubmit="saveToSheet(event)" class="space-y-6">
+            
+            <!-- Section 1: ข้อมูลพื้นฐาน -->
+            <div class="form-section">
+                <div class="flex items-center gap-3 mb-6 text-emerald-400">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                    <h3 class="text-xs font-black uppercase tracking-widest">ข้อมูลการเทรดหลัก</h3>
+                </div>
+                <div class="flex justify-center mb-6">
+                    <input type="date" id="tradeDate" required class="!w-fit !p-3 !text-[11px] !bg-emerald-500/5 !border-emerald-500/20 !text-emerald-400 !font-black uppercase">
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="space-y-2"><label class="text-[10px] text-slate-500 font-bold uppercase text-center block">กำไรสุทธิ ($)</label><input type="number" id="profit" step="0.01" required></div>
+                    <div class="space-y-2"><label class="text-[10px] text-slate-500 font-bold uppercase text-center block">เงินทุน ($)</label><input type="number" id="capital" step="0.01" required value="30"></div>
+                </div>
+                <div class="grid grid-cols-2 gap-4 mt-4">
+                    <div class="space-y-2"><label class="text-[10px] text-slate-500 font-bold uppercase text-center block">Wins (ไม้)</label><input type="number" id="wins" required value="0" onchange="autoCalc()"></div>
+                    <div class="space-y-2"><label class="text-[10px] text-slate-500 font-bold uppercase text-center block">Losses (ไม้)</label><input type="number" id="losses" required value="0" onchange="autoCalc()"></div>
+                </div>
             </div>
-            <div class="grid grid-cols-2 gap-6">
-                <div class="space-y-2"><label class="text-[10px] text-emerald-400/80 font-black uppercase text-center block tracking-widest">Net Profit ($)</label><input type="number" id="profit" step="0.01" required placeholder="0.00"></div>
-                <div class="space-y-2"><label class="text-[10px] text-blue-400/80 font-black uppercase text-center block tracking-widest">Deposit ($)</label><input type="number" id="capital" step="0.01" required value="30"></div>
-                <div class="space-y-2"><label class="text-[10px] text-slate-500 font-black uppercase text-center block tracking-widest">Wins</label><input type="number" id="wins" required value="0"></div>
-                <div class="space-y-2"><label class="text-[10px] text-slate-500 font-black uppercase text-center block tracking-widest">Losses</label><input type="number" id="losses" required value="0"></div>
-                <div class="space-y-2"><label class="text-[10px] text-slate-600 font-black uppercase text-center block tracking-widest">PF Score</label><input type="number" id="pf" step="0.01" value="0"></div>
-                <div class="space-y-2"><label class="text-[10px] text-slate-600 font-black uppercase text-center block tracking-widest">Max DD %</label><input type="number" id="dd" step="0.01" value="0"></div>
+
+            <!-- Section 2: สถิติรวมประสิทธิภาพ -->
+            <div class="form-section">
+                <div class="flex items-center gap-3 mb-6 text-blue-400">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="12" y1="20" x2="12" y2="10"/><line x1="18" y1="20" x2="18" y2="4"/><line x1="6" y1="20" x2="6" y2="16"/></svg>
+                    <h3 class="text-xs font-black uppercase tracking-widest">ประสิทธิภาพ (Efficiency)</h3>
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="space-y-2"><label class="text-[10px] text-slate-500 font-bold uppercase text-center block">PF Score</label><input type="number" id="pf" step="0.01" value="0"></div>
+                    <div class="space-y-2"><label class="text-[10px] text-rose-500/80 font-bold uppercase text-center block">Max DD %</label><input type="number" id="dd" step="0.01" value="0"></div>
+                </div>
+                <div class="grid grid-cols-2 gap-4 mt-4">
+                    <div class="space-y-2"><label class="text-[10px] text-slate-500 font-bold uppercase text-center block">Total Trades</label><input type="number" id="total_trades" value="0"></div>
+                    <div class="space-y-2"><label class="text-[10px] text-slate-500 font-bold uppercase text-center block">Win Rate %</label><input type="number" id="winrate" step="0.01" value="0"></div>
+                </div>
+                <div class="grid grid-cols-2 gap-4 mt-4">
+                    <div class="space-y-2"><label class="text-[10px] text-slate-500 font-bold uppercase text-center block">Avg Win ($)</label><input type="number" id="avg_win" step="0.01" value="0"></div>
+                    <div class="space-y-2"><label class="text-[10px] text-slate-500 font-bold uppercase text-center block">Avg Loss ($)</label><input type="number" id="avg_loss" step="0.01" value="0"></div>
+                </div>
             </div>
-            <button type="submit" class="w-full bg-gradient-to-r from-emerald-600 to-emerald-400 py-6 rounded-3xl font-black uppercase text-xs text-white shadow-[0_15px_30px_rgba(16,185,129,0.3)] active:scale-95 transition-all mt-6">Confirm Deploy</button>
+
+            <!-- Section 3: วิเคราะห์ผลตอบแทนเชิงลึก -->
+            <div class="form-section">
+                <div class="flex items-center gap-3 mb-6 text-amber-400">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+                    <h3 class="text-xs font-black uppercase tracking-widest">การวิเคราะห์ขั้นสูง</h3>
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="space-y-2"><label class="text-[10px] text-slate-500 font-bold uppercase text-center block">Expectancy</label><input type="number" id="expectancy" step="0.01" value="0"></div>
+                    <div class="space-y-2"><label class="text-[10px] text-slate-500 font-bold uppercase text-center block">Recovery Factor</label><input type="number" id="recovery_factor" step="0.01" value="0"></div>
+                </div>
+                <div class="grid grid-cols-2 gap-4 mt-4">
+                    <div class="space-y-2"><label class="text-[10px] text-slate-500 font-bold uppercase text-center block">Max Con. Win</label><input type="number" id="max_consecutive_win" value="0"></div>
+                    <div class="space-y-2"><label class="text-[10px] text-slate-500 font-bold uppercase text-center block">Max Con. Loss</label><input type="number" id="max_consecutive_loss" value="0"></div>
+                </div>
+                <div class="grid grid-cols-2 gap-4 mt-4">
+                    <div class="space-y-2"><label class="text-[10px] text-slate-500 font-bold uppercase text-center block">Buy Profit ($)</label><input type="number" id="buy_profit" step="0.01" value="0"></div>
+                    <div class="space-y-2"><label class="text-[10px] text-slate-500 font-bold uppercase text-center block">Sell Profit ($)</label><input type="number" id="sell_profit" step="0.01" value="0"></div>
+                </div>
+            </div>
+
+            <!-- Section 4: สภาวะตลาดและเวลา -->
+            <div class="form-section">
+                <div class="flex items-center gap-3 mb-6 text-indigo-400">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                    <h3 class="text-xs font-black uppercase tracking-widest">ข้อมูลตลาด & เซสชัน</h3>
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="space-y-2"><label class="text-[10px] text-slate-500 font-bold uppercase text-center block">Session</label>
+                        <select id="session">
+                            <option value="Asian">Asian (โตเกียว)</option>
+                            <option value="London">London (ลอนดอน)</option>
+                            <option value="New York">New York (นิวยอร์ก)</option>
+                            <option value="Overlap">NY/London Overlap</option>
+                        </select>
+                    </div>
+                    <div class="space-y-2"><label class="text-[10px] text-slate-500 font-bold uppercase text-center block">Market Type</label>
+                        <select id="market_type">
+                            <option value="Trending">Trending (มีเทรนด์)</option>
+                            <option value="Ranging">Ranging (ไซด์เวย์)</option>
+                            <option value="Volatile">Volatile (ผันผวนสูง)</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-4 mt-4">
+                    <div class="space-y-2"><label class="text-[10px] text-slate-500 font-bold uppercase text-center block">Avg Spread</label><input type="number" id="avg_spread" step="0.1" value="0"></div>
+                    <div class="space-y-2"><label class="text-[10px] text-slate-500 font-bold uppercase text-center block">Max Hold (Min)</label><input type="number" id="max_hold_minutes" value="0"></div>
+                </div>
+            </div>
+
+            <button type="submit" class="w-full bg-gradient-to-r from-emerald-600 to-emerald-400 py-6 rounded-3xl font-black uppercase text-xs text-white shadow-xl active:scale-95 transition-all mt-4">Execute Data Deployment</button>
         </form>
     </div>
 
-    <!-- 🛸 Filter Custom Range Panel -->
+    <!-- 🛸 Other Modals -->
     <div id="customFilterModal" class="bottom-sheet fixed bottom-0 left-0 right-0 glass rounded-t-[3.5rem] z-[60] p-10 pb-16 shadow-2xl max-w-lg mx-auto">
-        <h2 class="text-xl font-black text-white text-center uppercase tracking-widest mb-10">Select Range</h2>
+        <h2 class="text-xl font-black text-white text-center uppercase tracking-widest mb-10 text-emerald-400">ระบุช่วงเวลาวิเคราะห์</h2>
         <div class="grid grid-cols-2 gap-4 mb-10">
-            <div class="space-y-3"><label class="text-[10px] text-slate-500 font-black uppercase px-2 tracking-widest">Start Date</label><input type="date" id="filterStart" class="!text-xs"></div>
-            <div class="space-y-3"><label class="text-[10px] text-slate-500 font-black uppercase px-2 tracking-widest">End Date</label><input type="date" id="filterEnd" class="!text-xs"></div>
+            <div class="space-y-3"><label class="text-[10px] text-slate-500 font-black uppercase px-2">เริ่ม</label><input type="date" id="filterStart" class="!text-xs"></div>
+            <div class="space-y-3"><label class="text-[10px] text-slate-500 font-black uppercase px-2">ถึง</label><input type="date" id="filterEnd" class="!text-xs"></div>
         </div>
-        <button onclick="applyCustomFilter()" class="w-full bg-emerald-600 py-6 rounded-3xl font-black uppercase text-xs text-white shadow-xl mb-4">Execute Filter</button>
-        <button onclick="toggleModal('customFilterModal', false)" class="w-full bg-white/5 py-5 rounded-3xl font-black uppercase text-[10px] text-slate-500">Back</button>
+        <button onclick="applyCustomFilter()" class="w-full bg-emerald-600 py-6 rounded-3xl font-black uppercase text-xs text-white shadow-xl mb-4">ดำเนินการกรองข้อมูล</button>
+        <button onclick="toggleModal('customFilterModal', false)" class="w-full bg-white/5 py-5 rounded-3xl font-black uppercase text-[10px] text-slate-500">ย้อนกลับ</button>
     </div>
 
-    <!-- 🛸 Metric Config Drawer -->
     <div id="selectorModal" class="bottom-sheet fixed bottom-0 left-0 right-0 glass rounded-t-[4rem] z-[60] p-10 pb-16 shadow-2xl max-w-2xl mx-auto">
         <div class="w-20 h-1 bg-white/10 rounded-full mx-auto mb-10"></div>
-        <h2 class="text-xl font-black text-white text-center uppercase tracking-widest mb-10">Configure HUD Slot <span id="activeSlotNum" class="text-emerald-400">1</span></h2>
+        <h2 class="text-xl font-black text-white text-center uppercase tracking-widest mb-10 text-emerald-400">เลือก HUD Slot <span id="activeSlotNum">1</span></h2>
         <div id="metricOptions" class="grid grid-cols-1 gap-3 max-h-[50vh] overflow-y-auto pr-4 no-scrollbar"></div>
     </div>
 
-    <!-- Loader & Toast -->
     <div id="loader" class="hidden fixed inset-0 bg-black/95 backdrop-blur-3xl z-[100] flex flex-col items-center justify-center">
         <div class="relative w-28 h-28">
             <div class="absolute inset-0 border-[4px] border-emerald-500/10 rounded-full"></div>
             <div class="absolute inset-0 border-[4px] border-t-emerald-500 rounded-full animate-spin"></div>
         </div>
-        <p class="text-[11px] font-black uppercase tracking-[1em] text-emerald-500 mt-12 animate-pulse">Syncing Hub...</p>
+        <p class="text-[11px] font-black uppercase tracking-[1em] text-emerald-500 mt-12 animate-pulse">Syncing Lab Hub</p>
     </div>
 
     <script>
@@ -267,37 +297,23 @@
             maxdd: { label: 'Max Drawdown', color: 'text-rose-500', border: 'border-rose-500/20', format: v => `${v.toFixed(1)}%`, icon: '📉' },
             trades: { label: 'Total Logs', color: 'text-indigo-400', border: 'border-indigo-500/20', format: v => `${v} ไม้`, icon: '📊' },
             growth: { label: 'Cap Growth', color: 'text-pink-400', border: 'border-pink-500/20', format: v => `${v.toFixed(1)}%`, icon: '🚀' },
-            bestDay: { label: 'Peak Profit', color: 'text-lime-400', border: 'border-lime-500/20', format: v => `$${v.toFixed(2)}`, icon: '🏆' },
-            avgDay: { label: 'Avg Daily', color: 'text-cyan-400', border: 'border-cyan-500/20', format: v => `$${v.toFixed(2)}`, icon: '📅' }
+            expectancy: { label: 'Expectancy', color: 'text-cyan-400', border: 'border-cyan-500/20', format: v => `$${v.toFixed(2)}`, icon: '🧪' }
         };
 
-        let slotPrefs = JSON.parse(localStorage.getItem('apex_v17_slots')) || ['profit', 'winrate', 'pf', 'maxdd'];
+        let slotPrefs = JSON.parse(localStorage.getItem('apex_v19_slots')) || ['profit', 'winrate', 'maxdd', 'pf'];
+
+        function autoCalc() {
+            const w = parseInt(document.getElementById('wins').value) || 0;
+            const l = parseInt(document.getElementById('losses').value) || 0;
+            const total = w + l;
+            document.getElementById('total_trades').value = total;
+            document.getElementById('winrate').value = total > 0 ? (w / total * 100).toFixed(1) : 0;
+        }
 
         function normalizeDate(input) {
             if (!input) return null;
             const d = new Date(input);
-            if (isNaN(d.getTime())) return input.split('T')[0];
-            return d.toLocaleDateString('sv-SE');
-        }
-
-        function setFilter(type) {
-            currentFilter = type;
-            document.querySelectorAll('.filter-chip').forEach(b => b.classList.remove('active'));
-            document.getElementById(`f-${type}`).classList.add('active');
-            if(type === 'custom') toggleModal('customFilterModal', true);
-            else {
-                document.getElementById('filterLabel').classList.remove('text-emerald-400');
-                updateUI();
-            }
-        }
-
-        function applyCustomFilter() {
-            customRange.start = document.getElementById('filterStart').value;
-            customRange.end = document.getElementById('filterEnd').value;
-            if(!customRange.start || !customRange.end) return;
-            document.getElementById('filterLabel').classList.add('text-emerald-400');
-            toggleModal('customFilterModal', false);
-            updateUI();
+            return isNaN(d.getTime()) ? input.split('T')[0] : d.toLocaleDateString('sv-SE');
         }
 
         function toggleModal(id, show) {
@@ -314,9 +330,22 @@
         }
 
         function closeModals() {
-            toggleModal('entryModal', false);
-            toggleModal('selectorModal', false);
+            toggleModal('entryModal', false); toggleModal('selectorModal', false); toggleModal('customFilterModal', false);
+        }
+
+        function setFilter(type) {
+            currentFilter = type;
+            document.querySelectorAll('.filter-chip').forEach(b => b.classList.remove('active'));
+            document.getElementById(`f-${type}`).classList.add('active');
+            if(type === 'custom') toggleModal('customFilterModal', true); else updateUI();
+        }
+
+        function applyCustomFilter() {
+            customRange.start = document.getElementById('filterStart').value;
+            customRange.end = document.getElementById('filterEnd').value;
+            if(!customRange.start || !customRange.end) return;
             toggleModal('customFilterModal', false);
+            updateUI();
         }
 
         function openSelector(idx) {
@@ -325,15 +354,12 @@
             const container = document.getElementById('metricOptions');
             container.innerHTML = '';
             Object.keys(METRICS).forEach(key => {
-                const isSelected = slotPrefs[idx] === key;
                 const btn = document.createElement('button');
-                btn.className = `w-full p-7 rounded-3xl text-left transition-all ${isSelected ? 'bg-emerald-500 text-white shadow-xl' : 'bg-white/5 text-slate-500'}`;
-                btn.innerHTML = `<div class="flex justify-between items-center"><span class="font-black text-[12px] tracking-widest">${METRICS[key].icon} ${METRICS[key].label}</span> ${isSelected ? '⚡' : ''}</div>`;
+                btn.className = `w-full p-7 rounded-3xl text-left transition-all ${slotPrefs[idx] === key ? 'bg-emerald-500 text-white shadow-xl' : 'bg-white/5 text-slate-500'}`;
+                btn.innerHTML = `<span class="font-black text-[12px] tracking-widest">${METRICS[key].icon} ${METRICS[key].label}</span>`;
                 btn.onclick = () => {
-                    slotPrefs[idx] = key;
-                    localStorage.setItem('apex_v17_slots', JSON.stringify(slotPrefs));
-                    updateUI();
-                    toggleModal('selectorModal', false);
+                    slotPrefs[idx] = key; localStorage.setItem('apex_v19_slots', JSON.stringify(slotPrefs));
+                    updateUI(); toggleModal('selectorModal', false);
                 };
                 container.appendChild(btn);
             });
@@ -354,62 +380,63 @@
 
         async function saveToSheet(e) {
             e.preventDefault();
-            const profit = parseFloat(document.getElementById('profit').value);
             const record = {
                 rawDate: document.getElementById('tradeDate').value,
                 date: new Date(document.getElementById('tradeDate').value).toLocaleDateString('th-TH'),
                 capital: parseFloat(document.getElementById('capital').value),
-                profit: profit,
+                profit: parseFloat(document.getElementById('profit').value),
                 wins: parseInt(document.getElementById('wins').value),
                 losses: parseInt(document.getElementById('losses').value),
                 pf: parseFloat(document.getElementById('pf').value) || 0,
-                dd: parseFloat(document.getElementById('dd').value) || 0
+                dd: parseFloat(document.getElementById('dd').value) || 0,
+                total_trades: parseInt(document.getElementById('total_trades').value) || 0,
+                winrate: parseFloat(document.getElementById('winrate').value) || 0,
+                avg_win: parseFloat(document.getElementById('avg_win').value) || 0,
+                avg_loss: parseFloat(document.getElementById('avg_loss').value) || 0,
+                expectancy: parseFloat(document.getElementById('expectancy').value) || 0,
+                recovery_factor: parseFloat(document.getElementById('recovery_factor').value) || 0,
+                max_consecutive_win: parseInt(document.getElementById('max_consecutive_win').value) || 0,
+                max_consecutive_loss: parseInt(document.getElementById('max_consecutive_loss').value) || 0,
+                buy_profit: parseFloat(document.getElementById('buy_profit').value) || 0,
+                sell_profit: parseFloat(document.getElementById('sell_profit').value) || 0,
+                session: document.getElementById('session').value,
+                market_type: document.getElementById('market_type').value,
+                avg_spread: parseFloat(document.getElementById('avg_spread').value) || 0,
+                max_hold_minutes: parseInt(document.getElementById('max_hold_minutes').value) || 0
             };
             toggleModal('entryModal', false);
             try {
                 await fetch(SHEETS_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(record) });
-                if(profit > 0) confetti({ particleCount: 200, spread: 90, origin: { y: 0.8 }, colors: ['#10b981', '#3b82f6', '#ffffff'] });
+                if(record.profit > 0) confetti({ particleCount: 200, spread: 90, origin: { y: 0.8 } });
                 showToast("DATA DEPLOYED ✅");
                 setTimeout(fetchData, 1500);
             } catch (err) { showToast("DEPLOY ERROR ❌"); }
         }
 
+        function calculateStats() {
+            const data = getFilteredData();
+            let p=0, w=0, l=0, dd=0, pfSum=0, expSum=0, startCap=30;
+            data.forEach((r, i) => {
+                p += parseFloat(r.profit) || 0; w += parseInt(r.wins) || 0; l += parseInt(r.losses) || 0;
+                if (parseFloat(r.dd) > dd) dd = parseFloat(r.dd);
+                pfSum += parseFloat(r.pf) || 0; expSum += parseFloat(r.expectancy) || 0;
+                if (i === data.length - 1) startCap = parseFloat(r.capital) || 30;
+            });
+            return { profit: p, winrate: (w+l)>0 ? (w/(w+l)*100) : 0, pf: data.length > 0 ? (pfSum/data.length) : 0, maxdd: dd, trades: w+l, expectancy: data.length > 0 ? (expSum/data.length) : 0, growth: startCap > 0 ? (p/startCap*100) : 0 };
+        }
+
         function getFilteredData() {
             if (currentFilter === 'all') return tradeHistory;
-            const now = new Date();
-            let start, end;
-            if (currentFilter === 'month') {
-                start = new Date(now.getFullYear(), now.getMonth(), 1);
-                end = new Date(now.getFullYear(), now.getMonth() + 1, 0);
-            } else if (currentFilter === 'week') {
-                start = new Date(now); start.setDate(now.getDate() - now.getDay());
-                end = new Date(now); end.setDate(now.getDate() + (6 - now.getDay()));
-            } else if (currentFilter === 'custom') {
-                start = new Date(customRange.start);
-                end = new Date(customRange.end);
-            }
-            return tradeHistory.filter(r => {
-                const d = new Date(r.matchDate);
-                return d >= start && d <= end;
-            });
+            const now = new Date(); let start, end;
+            if (currentFilter === 'month') { start = new Date(now.getFullYear(), now.getMonth(), 1); end = new Date(now.getFullYear(), now.getMonth() + 1, 0); }
+            else if (currentFilter === 'week') { start = new Date(now); start.setDate(now.getDate() - now.getDay()); end = new Date(now); end.setDate(now.getDate() + (6 - now.getDay())); }
+            else if (currentFilter === 'custom') { start = new Date(customRange.start); end = new Date(customRange.end); }
+            return tradeHistory.filter(r => { const d = new Date(r.matchDate); return d >= start && d <= end; });
         }
 
         function updateUI() {
-            const data = getFilteredData();
-            let p=0, w=0, l=0, dd=0, pfSum=0, best=0, startCap=30;
-            data.forEach((r, i) => {
-                const pr = parseFloat(r.profit) || 0;
-                p += pr; w += parseInt(r.wins) || 0; l += parseInt(r.losses) || 0;
-                if (parseFloat(r.dd) > dd) dd = parseFloat(r.dd);
-                pfSum += parseFloat(r.pf) || 0;
-                if (pr > best) best = pr;
-                if (i === data.length - 1) startCap = parseFloat(r.capital) || 30;
-            });
-
-            const stats = { profit: p, winrate: (w+l)>0 ? (w/(w+l)*100) : 0, pf: data.length > 0 ? (pfSum/data.length) : 0, maxdd: dd, trades: w+l, bestDay: best, avgDay: data.length > 0 ? p/data.length : 0, growth: startCap > 0 ? (p/startCap*100) : 0 };
-
-            const container = document.getElementById('kpiContainer');
-            container.innerHTML = '';
+            const stats = calculateStats();
+            const container = document.getElementById('kpiContainer'); container.innerHTML = '';
             slotPrefs.forEach((key, idx) => {
                 const cfg = METRICS[key];
                 const card = document.createElement('div');
@@ -418,13 +445,12 @@
                 card.innerHTML = `
                     <p class="text-[9px] uppercase font-black tracking-widest mb-2 ${cfg.color}">${cfg.label}</p>
                     <h3 class="text-2xl font-black font-mono text-white tracking-tighter">${cfg.format(stats[key])}</h3>
-                    <div class="absolute -right-2 -bottom-2 opacity-[0.05] group-hover:opacity-20 transition-all"><span class="text-7xl">${cfg.icon}</span></div>
+                    <div class="absolute -right-2 -bottom-2 opacity-[0.05] transition-all"><span class="text-7xl">${cfg.icon}</span></div>
                 `;
                 container.appendChild(card);
             });
 
-            const list = document.getElementById('historyList');
-            list.innerHTML = '';
+            const list = document.getElementById('historyList'); list.innerHTML = '';
             document.getElementById('logCount').innerText = `${tradeHistory.length} SECURED RECORDS`;
             [...tradeHistory].sort((a,b) => new Date(b.rawDate) - new Date(a.rawDate)).slice(0, 8).forEach(r => {
                 const pr = parseFloat(r.profit) || 0;
@@ -434,11 +460,11 @@
                 div.innerHTML = `
                     <div class="flex items-center gap-4">
                         <div class="w-12 h-12 rounded-2xl flex items-center justify-center ${pr >= 0 ? 'bg-emerald-500/10 text-emerald-400' : 'bg-rose-500/10 text-rose-400'} border border-white/5 shadow-inner">
-                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5"><path d="${pr>=0?'M12 19V5M5 12l7-7 7 7':'M12 5v14M5 12l7 7 7-7'}"/></svg>
+                            <span class="font-black text-[10px]">${r.session ? r.session.substring(0,2).toUpperCase() : 'FX'}</span>
                         </div>
                         <div>
                             <p class="text-[13px] font-black text-white">${new Date(r.rawDate).toLocaleDateString('th-TH', {day:'numeric', month:'short'})}</p>
-                            <p class="text-[9px] text-slate-500 font-bold uppercase tracking-widest">W:${r.wins} L:${r.losses} • PF ${r.pf}</p>
+                            <p class="text-[9px] text-slate-500 font-bold uppercase tracking-widest">${r.market_type || 'Market'} • W/L: ${r.wins}/${r.losses}</p>
                         </div>
                     </div>
                     <p class="text-xl font-black font-mono ${pr >= 0 ? 'text-emerald-400' : 'text-rose-400'}">${pr>=0?'+':''}${pr.toFixed(2)}</p>
@@ -454,21 +480,18 @@
             const y = viewDate.getFullYear(), m = viewDate.getMonth();
             const first = new Date(y, m, 1).getDay(), days = new Date(y, m+1, 0).getDate();
             for(let i=0; i<first; i++) body.appendChild(document.createElement('div'));
-            
             for(let d=1; d<=days; d++) {
                 const dStr = `${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
                 const t = tradeHistory.find(x => x.matchDate === dStr);
                 const div = document.createElement('div');
                 div.className = "day-card flex flex-col items-center justify-center cursor-pointer";
                 if(t) {
-                    const pr = parseFloat(t.profit) || 0;
-                    const isWin = pr >= 0;
-                    const winP = (parseInt(t.wins) / (parseInt(t.wins) + parseInt(t.losses)) * 100) || 0;
-                    if(isWin) div.classList.add('win-glow'); else div.classList.add('glow-loss');
+                    const pr = parseFloat(t.profit) || 0; const isWin = pr >= 0;
+                    if(isWin) div.classList.add('win-glow');
                     div.innerHTML = `
                         <span class="absolute top-2.5 left-2.5 text-[9px] font-black ${isWin?'text-emerald-400/50':'text-rose-400/50'}">${d}</span>
                         <p class="text-center text-[11px] md:text-lg font-black font-mono ${isWin?'text-emerald-400':'text-rose-400'}">${Math.round(pr)}</p>
-                        <div class="p-bar-container"><div class="p-bar-fill ${isWin?'bg-emerald-400':'bg-rose-500'}" style="width: ${winP}%"></div></div>
+                        <div class="p-bar-container"><div class="p-bar-fill ${isWin?'bg-emerald-400':'bg-rose-500'}" style="width: ${t.winrate||0}%"></div></div>
                     `;
                     div.onclick = () => { fillForm(t); toggleModal('entryModal', true); };
                 } else {
@@ -481,17 +504,31 @@
 
         function fillForm(r) {
             document.getElementById('tradeDate').value = r.matchDate;
-            document.getElementById('profit').value = r.profit;
-            document.getElementById('capital').value = r.capital;
-            document.getElementById('wins').value = r.wins;
-            document.getElementById('losses').value = r.losses;
-            document.getElementById('pf').value = r.pf;
-            document.getElementById('dd').value = r.dd;
+            document.getElementById('profit').value = r.profit || 0;
+            document.getElementById('capital').value = r.capital || 30;
+            document.getElementById('wins').value = r.wins || 0;
+            document.getElementById('losses').value = r.losses || 0;
+            document.getElementById('pf').value = r.pf || 0;
+            document.getElementById('dd').value = r.dd || 0;
+            document.getElementById('total_trades').value = r.total_trades || 0;
+            document.getElementById('winrate').value = r.winrate || 0;
+            document.getElementById('avg_win').value = r.avg_win || 0;
+            document.getElementById('avg_loss').value = r.avg_loss || 0;
+            document.getElementById('expectancy').value = r.expectancy || 0;
+            document.getElementById('recovery_factor').value = r.recovery_factor || 0;
+            document.getElementById('max_consecutive_win').value = r.max_consecutive_win || 0;
+            document.getElementById('max_consecutive_loss').value = r.max_consecutive_loss || 0;
+            document.getElementById('buy_profit').value = r.buy_profit || 0;
+            document.getElementById('sell_profit').value = r.sell_profit || 0;
+            document.getElementById('session').value = r.session || "Asian";
+            document.getElementById('market_type').value = r.market_type || "Trending";
+            document.getElementById('avg_spread').value = r.avg_spread || 0;
+            document.getElementById('max_hold_minutes').value = r.max_hold_minutes || 0;
         }
 
         function showToast(m) {
             const t = document.getElementById('toast') || document.createElement('div');
-            t.id = 'toast'; t.className = "fixed bottom-36 left-1/2 -translate-x-1/2 glass px-12 py-5 rounded-full z-[100] text-[10px] font-black uppercase tracking-[0.3em] transition-all duration-500 opacity-0 pointer-events-none text-emerald-400 border-emerald-500/20";
+            t.id = 'toast'; t.className = "fixed bottom-36 left-1/2 -translate-x-1/2 glass px-12 py-5 rounded-full z-[100] text-[10px] font-black uppercase transition-all duration-500 opacity-0 pointer-events-none text-emerald-400 border-emerald-500/20";
             t.innerText = m; if(!document.getElementById('toast')) document.body.appendChild(t);
             t.style.opacity = "1"; t.style.transform = "translate(-50%, 0)";
             setTimeout(() => { t.style.opacity = "0"; t.style.transform = "translate(-50%, 40px)"; }, 3000);
